@@ -1,0 +1,86 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mi="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        x:Class="TechTeaStudio.GitClient.App.Views.MergeDialog"
+        Title="Merge branch"
+        Width="520" Height="360"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        ShowInTaskbar="False"
+        Background="{DynamicResource HyperionSurfaceBaseBrush}"
+        Foreground="{DynamicResource HyperionTextHigh}"
+        FontSize="12">
+
+  <Window.Styles>
+    <Style Selector="TextBox">
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="MinHeight" Value="36" />
+    </Style>
+    <Style Selector="Button.action">
+      <Setter Property="Padding" Value="14,6" />
+      <Setter Property="MinHeight" Value="32" />
+      <Setter Property="FontSize" Value="11" />
+    </Style>
+    <Style Selector="CheckBox">
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="MinHeight" Value="22" />
+    </Style>
+  </Window.Styles>
+
+  <Border Padding="18" Background="{DynamicResource HyperionSurfaceCardBrush}">
+    <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,*,Auto" RowSpacing="10">
+
+      <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8">
+        <mi:MaterialIcon Kind="SourceMerge" Width="20" Height="20"
+                         Foreground="{DynamicResource HyperionPrimaryBrush}" />
+        <TextBlock Text="Merge branch into current HEAD" FontSize="15" FontWeight="SemiBold"
+                   VerticalAlignment="Center" />
+      </StackPanel>
+
+      <TextBlock Grid.Row="1" Text="Source branch" FontSize="10" FontWeight="SemiBold"
+                 Foreground="{DynamicResource HyperionTextMedium}" />
+
+      <ComboBox Grid.Row="2"
+                Name="SourceBranchBox"
+                HorizontalAlignment="Stretch"
+                MinHeight="36">
+        <ComboBox.ItemTemplate>
+          <DataTemplate>
+            <StackPanel Orientation="Horizontal" Spacing="6">
+              <mi:MaterialIcon Kind="SourceBranch" Width="12" Height="12"
+                               Foreground="{DynamicResource HyperionTertiaryBrush}" />
+              <TextBlock Text="{Binding Name}" VerticalAlignment="Center" FontSize="12" />
+            </StackPanel>
+          </DataTemplate>
+        </ComboBox.ItemTemplate>
+      </ComboBox>
+
+      <StackPanel Grid.Row="3" Orientation="Vertical" Spacing="4">
+        <CheckBox Name="NoFastForwardBox" Content="Always create a merge commit (no fast-forward)" />
+        <CheckBox Name="SquashBox" Content="Squash source history into one index update" />
+        <CheckBox Name="CommitOnSuccessBox" Content="Commit automatically on success" IsChecked="True" />
+      </StackPanel>
+
+      <TextBlock Grid.Row="4" Text="Optional merge message" FontSize="10" FontWeight="SemiBold"
+                 Foreground="{DynamicResource HyperionTextMedium}" />
+
+      <TextBox Grid.Row="5"
+               Name="CustomMessageBox"
+               AcceptsReturn="True"
+               TextWrapping="Wrap"
+               Watermark="Leave blank for the default merge message" />
+
+      <StackPanel Grid.Row="6" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+        <Button Classes="Outline action" Click="Cancel_Click">
+          <TextBlock Text="CANCEL" />
+        </Button>
+        <Button Classes="Flat action" Click="Merge_Click" IsDefault="True">
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <mi:MaterialIcon Kind="SourceMerge" Width="14" Height="14" />
+            <TextBlock Text="MERGE" VerticalAlignment="Center" />
+          </StackPanel>
+        </Button>
+      </StackPanel>
+    </Grid>
+  </Border>
+</Window>

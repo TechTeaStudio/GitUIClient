@@ -1,0 +1,84 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mi="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        x:Class="TechTeaStudio.GitClient.App.Views.CreateTagDialog"
+        Title="Create tag"
+        Width="520" Height="380"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        ShowInTaskbar="False"
+        Background="{DynamicResource HyperionSurfaceBaseBrush}"
+        Foreground="{DynamicResource HyperionTextHigh}"
+        FontSize="12">
+
+  <Window.Styles>
+    <Style Selector="TextBox">
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="MinHeight" Value="36" />
+    </Style>
+    <Style Selector="TextBox.multiline">
+      <Setter Property="MinHeight" Value="80" />
+      <Setter Property="AcceptsReturn" Value="True" />
+      <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+    <Style Selector="Button.action">
+      <Setter Property="Padding" Value="14,6" />
+      <Setter Property="MinHeight" Value="32" />
+      <Setter Property="FontSize" Value="11" />
+    </Style>
+    <Style Selector="CheckBox">
+      <Setter Property="FontSize" Value="11" />
+    </Style>
+  </Window.Styles>
+
+  <Border Padding="18" Background="{DynamicResource HyperionSurfaceCardBrush}" CornerRadius="0">
+    <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,*,Auto" RowSpacing="10">
+
+      <!-- Header -->
+      <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8">
+        <mi:MaterialIcon Kind="TagPlusOutline" Width="20" Height="20"
+                         Foreground="{DynamicResource HyperionPrimaryBrush}" />
+        <TextBlock Text="Create tag" FontSize="15" FontWeight="SemiBold"
+                   VerticalAlignment="Center" />
+      </StackPanel>
+
+      <!-- Name -->
+      <TextBox Grid.Row="1"
+               Name="NameBox"
+               Watermark="Tag name  (e.g. v1.0.0)" />
+
+      <!-- Target SHA -->
+      <TextBox Grid.Row="2"
+               Name="TargetShaBox"
+               Watermark="Target SHA  (commit the tag points at)" />
+
+      <!-- Annotated checkbox -->
+      <CheckBox Grid.Row="3"
+                Name="AnnotatedBox"
+                Content="Annotated tag (creates a tag object with tagger + message)"
+                IsCheckedChanged="AnnotatedBox_Changed" />
+
+      <!-- Message (visible only when annotated) -->
+      <TextBox Grid.Row="4"
+               Name="MessageBox"
+               Classes="multiline"
+               IsVisible="False"
+               Watermark="Tag message  (annotation body)" />
+
+      <Border Grid.Row="5" />
+
+      <!-- Buttons -->
+      <StackPanel Grid.Row="6" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+        <Button Classes="Outline action" Click="Cancel_Click">
+          <TextBlock Text="CANCEL" />
+        </Button>
+        <Button Classes="Flat action" Click="Create_Click" IsDefault="True">
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <mi:MaterialIcon Kind="TagPlusOutline" Width="14" Height="14" />
+            <TextBlock Text="CREATE" VerticalAlignment="Center" />
+          </StackPanel>
+        </Button>
+      </StackPanel>
+    </Grid>
+  </Border>
+</Window>

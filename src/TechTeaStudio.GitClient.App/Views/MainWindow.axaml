@@ -68,6 +68,112 @@
 
   <DockPanel LastChildFill="True">
 
+    <!-- Menu bar -->
+    <Menu DockPanel.Dock="Top" Background="{DynamicResource HyperionSurfaceDialogBrush}">
+      <MenuItem Header="_File">
+        <MenuItem Header="_Open repo…" Click="Open_Click">
+          <MenuItem.Icon><mi:MaterialIcon Kind="FolderOpenOutline" Width="16" Height="16" /></MenuItem.Icon>
+        </MenuItem>
+        <MenuItem Header="_Clone…" Click="Clone_Click">
+          <MenuItem.Icon><mi:MaterialIcon Kind="CloudDownloadOutline" Width="16" Height="16" /></MenuItem.Icon>
+        </MenuItem>
+        <MenuItem Header="_Init new repo…" Click="Init_Click">
+          <MenuItem.Icon><mi:MaterialIcon Kind="FolderPlusOutline" Width="16" Height="16" /></MenuItem.Icon>
+        </MenuItem>
+        <Separator />
+        <MenuItem Header="E_xit" Click="Exit_Click">
+          <MenuItem.Icon><mi:MaterialIcon Kind="ExitToApp" Width="16" Height="16" /></MenuItem.Icon>
+        </MenuItem>
+      </MenuItem>
+      <MenuItem Header="_Repo">
+        <MenuItem Header="_Refresh" Command="{Binding RefreshCommand}">
+          <MenuItem.Icon><mi:MaterialIcon Kind="Refresh" Width="16" Height="16" /></MenuItem.Icon>
+        </MenuItem>
+        <Separator />
+        <MenuItem Header="_Fetch…" Click="Fetch_Click">
+          <MenuItem.Icon><mi:MaterialIcon Kind="CloudDownloadOutline" Width="16" Height="16" /></MenuItem.Icon>
+        </MenuItem>
+        <MenuItem Header="_Pull…" Click="Pull_Click">
+          <MenuItem.Icon><mi:MaterialIcon Kind="CloudSyncOutline" Width="16" Height="16" /></MenuItem.Icon>
+        </MenuItem>
+        <MenuItem Header="P_ush…" Click="Push_Click">
+          <MenuItem.Icon><mi:MaterialIcon Kind="CloudUploadOutline" Width="16" Height="16" /></MenuItem.Icon>
+        </MenuItem>
+        <Separator />
+        <MenuItem Header="_Add remote…" Click="AddRemote_Click" />
+        <MenuItem Header="Re_name remote…" Click="RenameRemote_Click" />
+        <MenuItem Header="_Submodule add…" Click="SubmoduleAdd_Click" />
+        <MenuItem Header="Su_bmodule update…" Click="SubmoduleUpdate_Click" />
+        <Separator />
+        <MenuItem Header="A_pply patch…" Click="ApplyPatch_Click" />
+        <MenuItem Header="Refl_og (HEAD)…" Click="Reflog_Click" />
+        <MenuItem Header="_Contributors…" Click="Contributors_Click" />
+      </MenuItem>
+      <MenuItem Header="_Branch">
+        <MenuItem Header="_Create branch…" Click="CreateBranch_Click">
+          <MenuItem.Icon><mi:MaterialIcon Kind="SourceBranchPlus" Width="16" Height="16" /></MenuItem.Icon>
+        </MenuItem>
+        <MenuItem Header="_Rename branch…" Click="RenameBranch_Click" />
+        <MenuItem Header="_Delete branch…" Click="DeleteBranch_Click">
+          <MenuItem.Icon><mi:MaterialIcon Kind="SourceBranchRemove" Width="16" Height="16" /></MenuItem.Icon>
+        </MenuItem>
+        <MenuItem Header="Check_out selected branch" Click="CheckoutBranch_Click">
+          <MenuItem.Icon><mi:MaterialIcon Kind="SourceBranchCheck" Width="16" Height="16" /></MenuItem.Icon>
+        </MenuItem>
+      </MenuItem>
+      <MenuItem Header="_Tag">
+        <MenuItem Header="_Create tag at selected commit…" Click="CreateTag_Click">
+          <MenuItem.Icon><mi:MaterialIcon Kind="Tag" Width="16" Height="16" /></MenuItem.Icon>
+        </MenuItem>
+        <MenuItem Header="_List tags…" Click="ListTags_Click" />
+      </MenuItem>
+      <MenuItem Header="_Commit">
+        <MenuItem Header="_Amend HEAD…" Click="Amend_Click">
+          <MenuItem.Icon><mi:MaterialIcon Kind="PencilOutline" Width="16" Height="16" /></MenuItem.Icon>
+        </MenuItem>
+        <MenuItem Header="_Stash…" Click="Stash_Click">
+          <MenuItem.Icon><mi:MaterialIcon Kind="Archive" Width="16" Height="16" /></MenuItem.Icon>
+        </MenuItem>
+        <MenuItem Header="_Apply stash 0" Click="StashApply_Click" />
+        <MenuItem Header="_Pop stash 0" Click="StashPop_Click" />
+        <MenuItem Header="_Note on selected commit…" Click="AddNote_Click" />
+        <MenuItem Header="C_lean untracked…" Click="Clean_Click">
+          <MenuItem.Icon><mi:MaterialIcon Kind="Broom" Width="16" Height="16" /></MenuItem.Icon>
+        </MenuItem>
+        <MenuItem Header="C_onflicts…" Click="Conflicts_Click">
+          <MenuItem.Icon><mi:MaterialIcon Kind="AlertOctagonOutline" Width="16" Height="16" /></MenuItem.Icon>
+        </MenuItem>
+      </MenuItem>
+      <MenuItem Header="Re_write">
+        <MenuItem Header="_Merge into current…" Click="Merge_Click">
+          <MenuItem.Icon><mi:MaterialIcon Kind="SourceMerge" Width="16" Height="16" /></MenuItem.Icon>
+        </MenuItem>
+        <MenuItem Header="_Rebase onto…" Click="Rebase_Click">
+          <MenuItem.Icon><mi:MaterialIcon Kind="SourceCommitNextLocal" Width="16" Height="16" /></MenuItem.Icon>
+        </MenuItem>
+        <MenuItem Header="Re_vert selected commit…" Click="Revert_Click">
+          <MenuItem.Icon><mi:MaterialIcon Kind="Undo" Width="16" Height="16" /></MenuItem.Icon>
+        </MenuItem>
+        <MenuItem Header="_Cherry-pick selected…" Click="CherryPick_Click">
+          <MenuItem.Icon><mi:MaterialIcon Kind="FruitCherries" Width="16" Height="16" /></MenuItem.Icon>
+        </MenuItem>
+        <MenuItem Header="Re_set to selected…" Click="Reset_Click">
+          <MenuItem.Icon><mi:MaterialIcon Kind="Restore" Width="16" Height="16" /></MenuItem.Icon>
+        </MenuItem>
+      </MenuItem>
+      <MenuItem Header="_Inspect">
+        <MenuItem Header="_Diff selected vs parent" Click="Diff_Click">
+          <MenuItem.Icon><mi:MaterialIcon Kind="FileCompare" Width="16" Height="16" /></MenuItem.Icon>
+        </MenuItem>
+        <MenuItem Header="_Tree at selected commit" Click="Tree_Click">
+          <MenuItem.Icon><mi:MaterialIcon Kind="FileTree" Width="16" Height="16" /></MenuItem.Icon>
+        </MenuItem>
+        <MenuItem Header="_Blame file at selected…" Click="Blame_Click">
+          <MenuItem.Icon><mi:MaterialIcon Kind="AccountSearchOutline" Width="16" Height="16" /></MenuItem.Icon>
+        </MenuItem>
+      </MenuItem>
+    </Menu>
+
     <!-- App bar: title + repo-path subtitle + busy + theme -->
     <Border DockPanel.Dock="Top" Classes="appbar">
       <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="10">

@@ -1,0 +1,78 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mi="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        x:Class="TechTeaStudio.GitClient.App.Views.ConflictsDialog"
+        Title="Resolve conflicts"
+        Width="640" Height="420"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False"
+        Background="{DynamicResource HyperionSurfaceBaseBrush}"
+        Foreground="{DynamicResource HyperionTextHigh}"
+        FontSize="12">
+
+  <Window.Styles>
+    <Style Selector="Button.row">
+      <Setter Property="Padding" Value="10,4" />
+      <Setter Property="MinHeight" Value="28" />
+      <Setter Property="FontSize" Value="11" />
+    </Style>
+    <Style Selector="Button.action">
+      <Setter Property="Padding" Value="14,6" />
+      <Setter Property="MinHeight" Value="32" />
+      <Setter Property="FontSize" Value="11" />
+    </Style>
+  </Window.Styles>
+
+  <Border Padding="18" Background="{DynamicResource HyperionSurfaceCardBrush}">
+    <Grid RowDefinitions="Auto,*,Auto" RowSpacing="12">
+
+      <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8">
+        <mi:MaterialIcon Kind="AlertCircleOutline" Width="20" Height="20"
+                         Foreground="{DynamicResource HyperionWarningBrush}" />
+        <TextBlock Text="Merge conflicts" FontSize="15" FontWeight="SemiBold"
+                   VerticalAlignment="Center" />
+        <TextBlock Name="CountLabel" Foreground="{DynamicResource HyperionTextMedium}"
+                   VerticalAlignment="Center" />
+      </StackPanel>
+
+      <Border Grid.Row="1"
+              BorderBrush="{DynamicResource HyperionBorderBrush}"
+              BorderThickness="1"
+              Background="{DynamicResource HyperionSurfaceElevatedBrush}">
+        <ScrollViewer>
+          <ItemsControl Name="ConflictsList">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8"
+                      Margin="8,6" Background="Transparent">
+                  <TextBlock Grid.Column="0"
+                             Text="{Binding Path}"
+                             VerticalAlignment="Center"
+                             TextTrimming="CharacterEllipsis" />
+                  <Button Grid.Column="1" Classes="Outline row"
+                          Tag="{Binding Path}"
+                          Click="UseOurs_Click">
+                    <TextBlock Text="USE OURS" />
+                  </Button>
+                  <Button Grid.Column="2" Classes="Outline row"
+                          Tag="{Binding Path}"
+                          Click="UseTheirs_Click">
+                    <TextBlock Text="USE THEIRS" />
+                  </Button>
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ScrollViewer>
+      </Border>
+
+      <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+        <TextBlock Name="StatusLabel" VerticalAlignment="Center"
+                   Foreground="{DynamicResource HyperionTextMedium}" />
+        <Button Classes="Flat action" Click="Close_Click">
+          <TextBlock Text="CLOSE" />
+        </Button>
+      </StackPanel>
+    </Grid>
+  </Border>
+</Window>

@@ -1,0 +1,95 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mi="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        x:Class="TechTeaStudio.GitClient.App.Views.PullDialog"
+        Title="Pull from remote"
+        Width="540" Height="420"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        ShowInTaskbar="False"
+        Background="{DynamicResource HyperionSurfaceBaseBrush}"
+        Foreground="{DynamicResource HyperionTextHigh}"
+        FontSize="12">
+
+  <Window.Styles>
+    <Style Selector="TextBox">
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="MinHeight" Value="36" />
+    </Style>
+    <Style Selector="ComboBox">
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="MinHeight" Value="36" />
+    </Style>
+    <Style Selector="Button.action">
+      <Setter Property="Padding" Value="14,6" />
+      <Setter Property="MinHeight" Value="32" />
+      <Setter Property="FontSize" Value="11" />
+    </Style>
+    <Style Selector="TextBlock.muted">
+      <Setter Property="Foreground" Value="{DynamicResource HyperionTextMedium}" />
+      <Setter Property="FontSize" Value="10" />
+    </Style>
+  </Window.Styles>
+
+  <Border Padding="18" Background="{DynamicResource HyperionSurfaceCardBrush}" CornerRadius="0">
+    <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,*,Auto" RowSpacing="10">
+
+      <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8">
+        <mi:MaterialIcon Kind="CloudSyncOutline" Width="20" Height="20"
+                         Foreground="{DynamicResource HyperionPrimaryBrush}" />
+        <TextBlock Text="Pull from remote" FontSize="15" FontWeight="SemiBold"
+                   VerticalAlignment="Center" />
+      </StackPanel>
+
+      <TextBlock Grid.Row="1" Text="REMOTE" Classes="muted" />
+      <ComboBox Grid.Row="2"
+                Name="RemoteCombo"
+                HorizontalAlignment="Stretch">
+        <ComboBox.ItemTemplate>
+          <DataTemplate>
+            <StackPanel Orientation="Horizontal" Spacing="6">
+              <mi:MaterialIcon Kind="ServerNetwork" Width="12" Height="12"
+                               Foreground="{DynamicResource HyperionTertiaryBrush}" />
+              <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
+              <TextBlock Text="{Binding Url}" Classes="muted" VerticalAlignment="Center" />
+            </StackPanel>
+          </DataTemplate>
+        </ComboBox.ItemTemplate>
+      </ComboBox>
+
+      <TextBlock Grid.Row="3" Text="BRANCH (optional — defaults to current upstream)" Classes="muted" />
+      <TextBox Grid.Row="4"
+               Name="BranchBox"
+               Watermark="Branch name (e.g. main); blank = current branch" />
+
+      <TextBlock Grid.Row="5" Text="CREDENTIALS (OPTIONAL — leave blank for anonymous / cached)" Classes="muted" />
+      <TextBox Grid.Row="6"
+               Name="UsernameBox"
+               Watermark="Username" />
+      <TextBox Grid.Row="7"
+               Name="PasswordBox"
+               PasswordChar="•"
+               Watermark="Password / personal access token" />
+
+      <ProgressBar Grid.Row="8"
+                   Name="ProgressBar"
+                   Minimum="0" Maximum="1.0"
+                   Height="6"
+                   Foreground="{DynamicResource HyperionTertiaryBrush}" />
+
+      <Border Grid.Row="9" />
+
+      <StackPanel Grid.Row="10" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+        <Button Classes="Outline action" Click="Cancel_Click">
+          <TextBlock Text="CANCEL" />
+        </Button>
+        <Button Classes="Flat action" Click="Pull_Click" IsDefault="True">
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <mi:MaterialIcon Kind="CloudSyncOutline" Width="14" Height="14" />
+            <TextBlock Text="PULL" VerticalAlignment="Center" />
+          </StackPanel>
+        </Button>
+      </StackPanel>
+    </Grid>
+  </Border>
+</Window>

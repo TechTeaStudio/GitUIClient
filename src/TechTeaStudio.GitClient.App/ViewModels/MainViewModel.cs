@@ -23,6 +23,9 @@ public sealed class MainViewModel : ObservableObject
     private readonly ICommitService _commits;
     private readonly IGravatarService? _gravatar;
 
+    public GitServices? Services { get; }
+    public IRepoHandle? Handle => _handle;
+
     private IRepoHandle? _handle;
     private CancellationTokenSource _cts = new();
 
@@ -34,11 +37,12 @@ public sealed class MainViewModel : ObservableObject
     private BranchInfo? _selectedBranch;
     private CommitListItem? _selectedCommit;
 
-    public MainViewModel(IRepositoryService repositories, ICommitService commits, IGravatarService? gravatar = null)
+    public MainViewModel(IRepositoryService repositories, ICommitService commits, IGravatarService? gravatar = null, GitServices? services = null)
     {
         _repos = repositories ?? throw new ArgumentNullException(nameof(repositories));
         _commits = commits ?? throw new ArgumentNullException(nameof(commits));
         _gravatar = gravatar;
+        Services = services;
 
         OpenCommand = new RelayCommand(OpenAsync, () => !IsBusy && !string.IsNullOrWhiteSpace(Path));
         CloneCommand = new RelayCommand(CloneAsync,
@@ -61,7 +65,28 @@ public sealed class MainViewModel : ObservableObject
         };
     }
 
-    public string Greeting => "TechTeaStudio Git Client — v0.2.0";
+    public string Greeting => "TechTeaStudio Git Client — v0.3.0";
+
+    /// <summary>Author used for commits driven by the UI (amend, merge, revert, etc.).</summary>
+    public AuthorInfo DefaultAuthor => new()
+    {
+        Name = Environment.UserName,
+        Email = $"{Environment.UserName}@local",
+    };
+
+    /// <summary>
+    /// Marker call for orchestrator-driven operations that finish outside RunBusy.
+    /// Surfaces a one-line status message and triggers a full refresh of state.
+    /// </summary>
+    public async Task AfterRepositoryMutationAsync(string statusMessage)
+    {
+        StatusMessage = statusMessage;
+        if (_handle is not null)
+        {
+            var ct = RestartCts();
+            await RunBusy(() => RefreshInternalAsync(ct)).ConfigureAwait(false);
+        }
+    }
 
     public string Path { get => _path; set => SetField(ref _path, value); }
     public string CloneUrl { get => _cloneUrl; set => SetField(ref _cloneUrl, value); }

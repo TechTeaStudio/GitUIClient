@@ -1,0 +1,114 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mi="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        x:Class="TechTeaStudio.GitClient.App.Views.ResetDialog"
+        Title="Reset HEAD"
+        Width="540" Height="380"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        ShowInTaskbar="False"
+        Background="{DynamicResource HyperionSurfaceBaseBrush}"
+        Foreground="{DynamicResource HyperionTextHigh}"
+        FontSize="12">
+
+  <Window.Styles>
+    <Style Selector="Button.action">
+      <Setter Property="Padding" Value="14,6" />
+      <Setter Property="MinHeight" Value="32" />
+      <Setter Property="FontSize" Value="11" />
+    </Style>
+    <Style Selector="RadioButton">
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="MinHeight" Value="24" />
+    </Style>
+  </Window.Styles>
+
+  <Border Padding="18" Background="{DynamicResource HyperionSurfaceCardBrush}">
+    <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,*,Auto" RowSpacing="10">
+
+      <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8">
+        <mi:MaterialIcon Kind="Backspace" Width="20" Height="20"
+                         Foreground="{DynamicResource HyperionPrimaryBrush}" />
+        <TextBlock Text="Reset HEAD to commit" FontSize="15" FontWeight="SemiBold"
+                   VerticalAlignment="Center" />
+      </StackPanel>
+
+      <StackPanel Grid.Row="1" Spacing="2">
+        <TextBlock Text="TARGET SHA" FontSize="9" FontWeight="SemiBold"
+                   Foreground="{DynamicResource HyperionTextMedium}" />
+        <TextBlock Name="ShaBlock" FontFamily="Consolas" FontSize="11"
+                   Foreground="{DynamicResource HyperionTertiaryBrush}"
+                   TextWrapping="Wrap" />
+      </StackPanel>
+
+      <TextBlock Grid.Row="2" Text="MODE" FontSize="9" FontWeight="SemiBold"
+                 Foreground="{DynamicResource HyperionTextMedium}" />
+
+      <StackPanel Grid.Row="3" Orientation="Vertical" Spacing="4">
+        <RadioButton Name="SoftRadio"
+                     GroupName="ResetMode"
+                     IsChecked="True"
+                     Checked="ModeChanged">
+          <StackPanel Orientation="Vertical" Spacing="1">
+            <TextBlock Text="Soft — move HEAD only" FontWeight="SemiBold" />
+            <TextBlock Text="Index and working tree are preserved. Safe."
+                       Foreground="{DynamicResource HyperionTextMedium}"
+                       FontSize="11" />
+          </StackPanel>
+        </RadioButton>
+        <RadioButton Name="MixedRadio"
+                     GroupName="ResetMode"
+                     Checked="ModeChanged">
+          <StackPanel Orientation="Vertical" Spacing="1">
+            <TextBlock Text="Mixed — move HEAD and reset index" FontWeight="SemiBold" />
+            <TextBlock Text="Default `git reset`. Working tree is preserved."
+                       Foreground="{DynamicResource HyperionTextMedium}"
+                       FontSize="11" />
+          </StackPanel>
+        </RadioButton>
+        <RadioButton Name="HardRadio"
+                     GroupName="ResetMode"
+                     Checked="ModeChanged">
+          <StackPanel Orientation="Vertical" Spacing="1">
+            <TextBlock Text="Hard — discard everything ahead of target"
+                       FontWeight="SemiBold"
+                       Foreground="{DynamicResource HyperionDangerBrush}" />
+            <TextBlock Text="Resets index AND working tree. Uncommitted changes are LOST."
+                       Foreground="{DynamicResource HyperionDangerBrush}"
+                       FontSize="11" />
+          </StackPanel>
+        </RadioButton>
+      </StackPanel>
+
+      <Border Grid.Row="4"
+              Name="HardWarning"
+              Background="{DynamicResource HyperionDangerBrush}"
+              CornerRadius="6"
+              Padding="10,6"
+              IsVisible="False">
+        <StackPanel Orientation="Horizontal" Spacing="6">
+          <mi:MaterialIcon Kind="AlertOctagonOutline" Width="16" Height="16" Foreground="White" />
+          <TextBlock Text="Hard reset is destructive: it will permanently delete all uncommitted work."
+                     Foreground="White"
+                     FontSize="11"
+                     FontWeight="SemiBold"
+                     TextWrapping="Wrap" />
+        </StackPanel>
+      </Border>
+
+      <Border Grid.Row="5" />
+
+      <StackPanel Grid.Row="6" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+        <Button Classes="Outline action" Click="Cancel_Click">
+          <TextBlock Text="CANCEL" />
+        </Button>
+        <Button Classes="Flat action" Click="Reset_Click" IsDefault="True">
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <mi:MaterialIcon Kind="Backspace" Width="14" Height="14" />
+            <TextBlock Text="RESET" VerticalAlignment="Center" />
+          </StackPanel>
+        </Button>
+      </StackPanel>
+    </Grid>
+  </Border>
+</Window>

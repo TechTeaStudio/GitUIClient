@@ -1,0 +1,72 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mi="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        x:Class="TechTeaStudio.GitClient.App.Views.CleanDialog"
+        Title="Clean untracked files"
+        Width="560" Height="460"
+        WindowStartupLocation="CenterOwner"
+        CanResize="True"
+        ShowInTaskbar="False"
+        Background="{DynamicResource HyperionSurfaceBaseBrush}"
+        Foreground="{DynamicResource HyperionTextHigh}"
+        FontSize="12">
+
+  <Window.Styles>
+    <Style Selector="Button.action">
+      <Setter Property="Padding" Value="14,6" />
+      <Setter Property="MinHeight" Value="32" />
+      <Setter Property="FontSize" Value="11" />
+    </Style>
+    <Style Selector="CheckBox.fileRow">
+      <Setter Property="Padding" Value="4,2" />
+      <Setter Property="Foreground" Value="{DynamicResource HyperionTextHigh}" />
+    </Style>
+  </Window.Styles>
+
+  <Border Padding="18" Background="{DynamicResource HyperionSurfaceCardBrush}" CornerRadius="0">
+    <Grid RowDefinitions="Auto,Auto,*,Auto" RowSpacing="12">
+
+      <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8">
+        <mi:MaterialIcon Kind="DeleteSweep" Width="20" Height="20"
+                         Foreground="{DynamicResource HyperionPrimaryBrush}" />
+        <TextBlock Text="Clean untracked files" FontSize="15" FontWeight="SemiBold"
+                   VerticalAlignment="Center" />
+      </StackPanel>
+
+      <TextBlock Grid.Row="1"
+                 Classes="muted"
+                 Text="Select the untracked files to permanently delete from disk."
+                 Foreground="{DynamicResource HyperionTextMedium}"
+                 TextWrapping="Wrap" />
+
+      <ListBox Grid.Row="2"
+               Name="FilesList"
+               Background="{DynamicResource HyperionSurfaceBaseBrush}"
+               BorderThickness="0"
+               SelectionMode="Single">
+        <ListBox.ItemTemplate>
+          <DataTemplate>
+            <CheckBox Classes="fileRow"
+                      IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                      Content="{Binding Path}" />
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+
+      <StackPanel Grid.Row="3" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+        <Button Classes="Outline action" Click="SelectAll_Click">
+          <TextBlock Text="SELECT ALL" />
+        </Button>
+        <Button Classes="Outline action" Click="Cancel_Click">
+          <TextBlock Text="CANCEL" />
+        </Button>
+        <Button Classes="Flat action" Click="Clean_Click" IsDefault="True">
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <mi:MaterialIcon Kind="DeleteSweep" Width="14" Height="14" />
+            <TextBlock Text="DELETE" VerticalAlignment="Center" />
+          </StackPanel>
+        </Button>
+      </StackPanel>
+    </Grid>
+  </Border>
+</Window>

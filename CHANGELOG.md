@@ -3,6 +3,58 @@
 All notable changes to this project are documented here.
 Format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] — 2026-05-15
+
+Feature-parity push toward Gitter_TTS. Six clusters built in parallel by sub-agents (each in its own git worktree), then merged into `product`.
+
+### Added — Remotes & Sync (cluster A)
+- `IRemoteService` + `LibGit2RemoteService` — list / add / remove / rename remotes, `ls-remote`.
+- `ISyncService` + `LibGit2SyncService` — fetch / pull / push (with `--force`), with `IProgress<SyncProgress>` reporting and optional `Credentials` (`UsernamePasswordCredentials` via libgit2 callback).
+- DTOs: `RemoteInfo`, `RemoteRefInfo`, `SyncProgress`, `PullResult` + `PullKind`, `Credentials`.
+- Dialogs: `AddRemoteDialog`, `RenameRemoteDialog`, `FetchDialog`, `PullDialog`, `PushDialog`.
+
+### Added — Branch ops & Tags (cluster B)
+- `IBranchOpsService` + `LibGit2BranchOpsService` — create / rename / delete / checkout. Merged-branch check uses `repo.ObjectDatabase.FindMergeBase`.
+- `ITagService` + `LibGit2TagService` — list / create lightweight / create annotated / delete.
+- DTO: `TagInfo` (with annotated metadata).
+- Dialogs: `CreateBranchDialog`, `RenameBranchDialog`, `DeleteBranchDialog`, `CreateTagDialog`.
+
+### Added — Rewrites (cluster C)
+- `IRewriteService` + `LibGit2RewriteService` — merge / rebase (start / continue / skip / abort) / revert / cherry-pick / reset (Soft / Mixed / Hard).
+- DTOs: `MergeOptions`, `MergeOutcome`, `RebaseState`, `RebaseStatus`, `ResetKind`.
+- Dialogs: `MergeDialog`, `RebaseDialog`, `RevertDialog`, `CherryPickDialog`, `ResetDialog`.
+
+### Added — Stash + Init + Amend + Clean (cluster D)
+- `IStashService` + `LibGit2StashService` — save / list / apply / pop / drop.
+- `IAmendService` + `LibGit2AmendService` — amend HEAD with optional new message and optional re-stage.
+- `ICleanService` + `LibGit2CleanService` — list untracked, delete selected paths from workdir.
+- `IInitService` + `LibGit2InitService` — init non-bare or bare repo.
+- DTO: `StashInfo`.
+- Dialogs: `StashSaveDialog`, `InitDialog`, `AmendDialog`, `CleanDialog`.
+
+### Added — Diff viewer + Tree browser + Blame (cluster E)
+- `ITreeService` + `LibGit2TreeService` — list tree at commit (with sub-path), read blob (text vs binary detection).
+- `IBlameService` + `LibGit2BlameService` — produce dense per-line `BlameLine` records.
+- `IFileDiffService` + `LibGit2FileDiffService` — structured per-file `FileDiff` with hunks + classified lines; `CompareWithParentAsync` handles root-commit (vs empty tree).
+- DTOs: `TreeEntry`, `FileDiff`, `DiffHunk`, `DiffLine`, `BlameLine`.
+- Windows: `DiffViewerWindow` (file list + unified diff with line numbers, green/red row coloring), `TreeBrowserWindow` (lazy-loaded tree, read-only blob viewer, binary banner), `BlameWindow` (per-line grid with short-sha copy, avatar initials).
+
+### Added — Submodules + Reflog + Conflicts + Patches + Contributors + Notes (cluster F)
+- `ISubmoduleService` + `LibGit2SubmoduleService` (uses `git` CLI for add, since LibGit2Sharp lacks a public Add API).
+- `IReflogService` + `LibGit2ReflogService`.
+- `IConflictsService` + `LibGit2ConflictsService` — list + resolve-by-ours / resolve-by-theirs.
+- `IPatchService` + `GitPatchService` (shells out to `git apply` / `git format-patch`).
+- `IContributorsService` + `LibGit2ContributorsService`.
+- `INotesService` + `LibGit2NotesService`.
+- DTOs: `SubmoduleInfo`, `ReflogEntry`, `ConflictInfo`, `ContributorInfo`.
+- Dialogs: `AddSubmoduleDialog`, `UpdateSubmoduleDialog`, `ConflictsDialog`, `ApplyPatchDialog`, `AddNoteDialog`.
+
+### Changed — UI integration
+- `MainWindow.axaml` gains a top-level `Menu` with categorised actions (File / Repo / Branch / Tag / Commit / Rewrite / Inspect) wired to handlers in `MainWindow.axaml.cs`.
+- `MainViewModel` gains a `Services` property of new `GitServices` record (bundle of all 18 new service interfaces) plus a public `Handle` and `DefaultAuthor`; `AfterRepositoryMutationAsync(msg)` refreshes state after dialog-driven operations.
+- `CompositionRoot` instantiates and wires all 18 services into the `GitServices` bundle.
+- Existing tests (clone / repo / commit / graph / VM) untouched; full suite: **120 passing, 1 skipped** (rebase E2E intentionally deferred).
+
 ## [0.2.0] — 2026-05-15
 
 ### Added
@@ -26,5 +78,5 @@ Format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 - `ICommitService` + `LibGit2CommitService` — stage (all or a path-spec subset) and commit with author metadata.
 - DTOs (records): `CommitInfo` (with `Summary` helper), `BranchInfo`, `RepoStatus`, `FileChange` + `FileChangeKind`, `AuthorInfo`, `CloneProgress` (with `Fraction` helper).
 - Avalonia App (`net10.0`, WinExe) — single window with path box + Open/Clone buttons, branch dropdown, commit list, selected-commit detail, status panel with per-file checkboxes, commit-message box and "Commit selected files" button. Manual DI through `CompositionRoot.cs` (no Microsoft.Extensions.DependencyInjection dependency).
-- `Directory.Build.props`, `dotnet.yml` CI (restore + build + test on push / PR to `product`), README, LICENSE, `.gitignore`, project `CLAUDE.md`, and `PLAN.md` documenting the three-worker partition.
+- `Directory.Build.props`, `dotnet.yml` CI (restore + build + test on push / PR to `product`), README, LICENSE, `.gitignore`, and project `CLAUDE.md`.
 - xUnit test suite in Core only (`RepositoryServiceTests`, `CommitServiceTests`, `MainViewModelTests`); temp-folder repos cleaned up on test exit.

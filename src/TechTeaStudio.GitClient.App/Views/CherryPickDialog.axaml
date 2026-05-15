@@ -1,0 +1,66 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mi="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        x:Class="TechTeaStudio.GitClient.App.Views.CherryPickDialog"
+        Title="Cherry-pick commit"
+        Width="520" Height="260"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        ShowInTaskbar="False"
+        Background="{DynamicResource HyperionSurfaceBaseBrush}"
+        Foreground="{DynamicResource HyperionTextHigh}"
+        FontSize="12">
+
+  <Window.Styles>
+    <Style Selector="Button.action">
+      <Setter Property="Padding" Value="14,6" />
+      <Setter Property="MinHeight" Value="32" />
+      <Setter Property="FontSize" Value="11" />
+    </Style>
+  </Window.Styles>
+
+  <Border Padding="18" Background="{DynamicResource HyperionSurfaceCardBrush}">
+    <Grid RowDefinitions="Auto,Auto,Auto,Auto,*,Auto" RowSpacing="10">
+
+      <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8">
+        <mi:MaterialIcon Kind="FoodApple" Width="20" Height="20"
+                         Foreground="{DynamicResource HyperionPrimaryBrush}" />
+        <TextBlock Text="Cherry-pick commit onto current HEAD" FontSize="15" FontWeight="SemiBold"
+                   VerticalAlignment="Center" />
+      </StackPanel>
+
+      <StackPanel Grid.Row="1" Spacing="2">
+        <TextBlock Text="SOURCE SHA" FontSize="9" FontWeight="SemiBold"
+                   Foreground="{DynamicResource HyperionTextMedium}" />
+        <TextBlock Name="ShaBlock" FontFamily="Consolas" FontSize="11"
+                   Foreground="{DynamicResource HyperionTertiaryBrush}"
+                   TextWrapping="Wrap" />
+      </StackPanel>
+
+      <StackPanel Grid.Row="2" Spacing="2">
+        <TextBlock Text="SUMMARY" FontSize="9" FontWeight="SemiBold"
+                   Foreground="{DynamicResource HyperionTextMedium}" />
+        <TextBlock Name="SummaryBlock" FontSize="12" TextWrapping="Wrap" />
+      </StackPanel>
+
+      <CheckBox Grid.Row="3"
+                Name="CommitOnSuccessBox"
+                Content="Commit cherry-pick automatically on success"
+                IsChecked="True" />
+
+      <Border Grid.Row="4" />
+
+      <StackPanel Grid.Row="5" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+        <Button Classes="Outline action" Click="Cancel_Click">
+          <TextBlock Text="CANCEL" />
+        </Button>
+        <Button Classes="Flat action" Click="CherryPick_Click" IsDefault="True">
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <mi:MaterialIcon Kind="FoodApple" Width="14" Height="14" />
+            <TextBlock Text="CHERRY-PICK" VerticalAlignment="Center" />
+          </StackPanel>
+        </Button>
+      </StackPanel>
+    </Grid>
+  </Border>
+</Window>

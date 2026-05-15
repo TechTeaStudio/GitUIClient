@@ -1,0 +1,63 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mi="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        x:Class="TechTeaStudio.GitClient.App.Views.AmendDialog"
+        Title="Amend last commit"
+        Width="540" Height="320"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        ShowInTaskbar="False"
+        Background="{DynamicResource HyperionSurfaceBaseBrush}"
+        Foreground="{DynamicResource HyperionTextHigh}"
+        FontSize="12">
+
+  <Window.Styles>
+    <Style Selector="TextBox">
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="MinHeight" Value="36" />
+    </Style>
+    <Style Selector="Button.action">
+      <Setter Property="Padding" Value="14,6" />
+      <Setter Property="MinHeight" Value="32" />
+      <Setter Property="FontSize" Value="11" />
+    </Style>
+  </Window.Styles>
+
+  <Border Padding="18" Background="{DynamicResource HyperionSurfaceCardBrush}" CornerRadius="0">
+    <Grid RowDefinitions="Auto,*,Auto,Auto" RowSpacing="12">
+
+      <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8">
+        <mi:MaterialIcon Kind="Pencil" Width="20" Height="20"
+                         Foreground="{DynamicResource HyperionPrimaryBrush}" />
+        <TextBlock Text="Amend last commit" FontSize="15" FontWeight="SemiBold"
+                   VerticalAlignment="Center" />
+      </StackPanel>
+
+      <TextBox Grid.Row="1"
+               Name="MessageBox"
+               AcceptsReturn="True"
+               TextWrapping="Wrap"
+               MinHeight="120"
+               VerticalAlignment="Stretch"
+               Watermark="Commit message" />
+
+      <CheckBox Grid.Row="2"
+                Name="IncludeStagedBox"
+                Content="Include staged file changes"
+                Foreground="{DynamicResource HyperionTextHigh}"
+                IsChecked="True" />
+
+      <StackPanel Grid.Row="3" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+        <Button Classes="Outline action" Click="Cancel_Click">
+          <TextBlock Text="CANCEL" />
+        </Button>
+        <Button Classes="Flat action" Click="Amend_Click" IsDefault="True">
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <mi:MaterialIcon Kind="Pencil" Width="14" Height="14" />
+            <TextBlock Text="AMEND" VerticalAlignment="Center" />
+          </StackPanel>
+        </Button>
+      </StackPanel>
+    </Grid>
+  </Border>
+</Window>

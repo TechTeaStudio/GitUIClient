@@ -5,7 +5,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>TechTeaStudio.GitClient.App</RootNamespace>
     <AssemblyName>TechTeaStudio.GitClient.App</AssemblyName>
-    <Version>0.2.0</Version>
+    <Version>0.3.0</Version>
     <Description>Avalonia front-end for the TechTeaStudio Git client.</Description>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
