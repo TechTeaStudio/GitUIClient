@@ -1,0 +1,148 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:TechTeaStudio.GitClient.App.ViewModels"
+        x:Class="TechTeaStudio.GitClient.App.Views.MainWindow"
+        x:DataType="vm:MainViewModel"
+        Title="TechTeaStudio Git Client"
+        Width="1100" Height="720"
+        WindowStartupLocation="CenterScreen">
+
+  <Grid RowDefinitions="Auto,Auto,*,Auto"
+        Margin="12">
+
+    <!-- Row 0: header -->
+    <TextBlock Grid.Row="0"
+               Text="{Binding Greeting}"
+               FontSize="16" FontWeight="SemiBold" Margin="0,0,0,8" />
+
+    <!-- Row 1: path + actions -->
+    <Grid Grid.Row="1" ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto" Margin="0,0,0,8">
+      <TextBlock Grid.Column="0" Text="Path:" VerticalAlignment="Center" Margin="0,0,8,0" />
+      <TextBox Grid.Column="1" Text="{Binding Path, Mode=TwoWay}" Watermark="C:\path\to\repo" />
+      <TextBox Grid.Column="2" Text="{Binding CloneUrl, Mode=TwoWay}" Watermark="git URL" Width="220" Margin="8,0,0,0" />
+      <Button Grid.Column="3" Content="Open" Command="{Binding OpenCommand}" Margin="8,0,0,0" />
+      <Button Grid.Column="4" Content="Clone" Command="{Binding CloneCommand}" Margin="4,0,0,0" />
+      <Button Grid.Column="5" Content="Refresh" Command="{Binding RefreshCommand}" Margin="4,0,0,0" />
+    </Grid>
+
+    <!-- Row 2: main 3-column area -->
+    <Grid Grid.Row="2" ColumnDefinitions="200,2*,2*">
+
+      <!-- Left: branches + status panel -->
+      <Grid Grid.Column="0" RowDefinitions="Auto,Auto,*">
+        <TextBlock Grid.Row="0" Text="Branches" FontWeight="SemiBold" Margin="0,0,0,4" />
+        <ComboBox Grid.Row="1"
+                  ItemsSource="{Binding Branches}"
+                  SelectedItem="{Binding SelectedBranch, Mode=TwoWay}"
+                  Margin="0,0,0,8"
+                  HorizontalAlignment="Stretch">
+          <ComboBox.ItemTemplate>
+            <DataTemplate>
+              <TextBlock Text="{Binding Name}" />
+            </DataTemplate>
+          </ComboBox.ItemTemplate>
+        </ComboBox>
+
+        <ScrollViewer Grid.Row="2">
+          <StackPanel>
+            <TextBlock Text="Working tree" FontWeight="SemiBold" Margin="0,8,0,4" />
+
+            <TextBlock Text="Modified" Foreground="DarkOrange" Margin="0,4,0,2" />
+            <ItemsControl ItemsSource="{Binding Modified}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}" Content="{Binding Path}" />
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <TextBlock Text="Added" Foreground="DarkGreen" Margin="0,4,0,2" />
+            <ItemsControl ItemsSource="{Binding Added}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}" Content="{Binding Path}" />
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <TextBlock Text="Deleted" Foreground="DarkRed" Margin="0,4,0,2" />
+            <ItemsControl ItemsSource="{Binding Deleted}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}" Content="{Binding Path}" />
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <TextBlock Text="Untracked" Foreground="Gray" Margin="0,4,0,2" />
+            <ItemsControl ItemsSource="{Binding Untracked}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}" Content="{Binding Path}" />
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </ScrollViewer>
+      </Grid>
+
+      <!-- Middle: commit list -->
+      <Grid Grid.Column="1" RowDefinitions="Auto,*" Margin="12,0,12,0">
+        <TextBlock Grid.Row="0" Text="Commits" FontWeight="SemiBold" Margin="0,0,0,4" />
+        <ListBox Grid.Row="1"
+                 ItemsSource="{Binding Commits}"
+                 SelectedItem="{Binding SelectedCommit, Mode=TwoWay}">
+          <ListBox.ItemTemplate>
+            <DataTemplate>
+              <Grid ColumnDefinitions="120,140,*">
+                <TextBlock Grid.Column="0" Text="{Binding Date}" FontFamily="Consolas" />
+                <TextBlock Grid.Column="1" Text="{Binding Author}" />
+                <TextBlock Grid.Column="2" Text="{Binding Summary}" TextTrimming="CharacterEllipsis" />
+              </Grid>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+      </Grid>
+
+      <!-- Right: selected commit detail -->
+      <Grid Grid.Column="2" RowDefinitions="Auto,*">
+        <TextBlock Grid.Row="0" Text="Selected commit" FontWeight="SemiBold" Margin="0,0,0,4" />
+        <Border Grid.Row="1" BorderBrush="Gray" BorderThickness="1" Padding="8">
+          <StackPanel DataContext="{Binding SelectedCommit}">
+            <TextBlock Text="(no commit selected)"
+                       IsVisible="{Binding ., Converter={x:Static ObjectConverters.IsNull}}"
+                       Foreground="Gray" />
+            <StackPanel IsVisible="{Binding ., Converter={x:Static ObjectConverters.IsNotNull}}">
+              <TextBlock>
+                <Run Text="sha:    " /><Run Text="{Binding Sha}" FontFamily="Consolas" />
+              </TextBlock>
+              <TextBlock>
+                <Run Text="author: " /><Run Text="{Binding Author}" />
+              </TextBlock>
+              <TextBlock>
+                <Run Text="date:   " /><Run Text="{Binding Date}" />
+              </TextBlock>
+              <TextBlock>
+                <Run Text="parents: " /><Run Text="{Binding ParentsText}" FontFamily="Consolas" />
+              </TextBlock>
+              <Separator Margin="0,8" />
+              <TextBlock Text="{Binding Message}" TextWrapping="Wrap" />
+            </StackPanel>
+          </StackPanel>
+        </Border>
+      </Grid>
+    </Grid>
+
+    <!-- Row 3: commit row + status bar -->
+    <Grid Grid.Row="3" RowDefinitions="Auto,Auto" Margin="0,8,0,0">
+      <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto">
+        <TextBlock Grid.Column="0" Text="Commit message:" VerticalAlignment="Center" Margin="0,0,8,0" />
+        <TextBox Grid.Column="1" Text="{Binding CommitMessage, Mode=TwoWay}" Watermark="Short, then optional body" />
+        <Button Grid.Column="2" Content="Commit selected files" Command="{Binding CommitCommand}" Margin="8,0,0,0" />
+      </Grid>
+      <Border Grid.Row="1" Background="#11000000" Padding="6" Margin="0,4,0,0">
+        <TextBlock Text="{Binding StatusMessage}" />
+      </Border>
+    </Grid>
+  </Grid>
+</Window>

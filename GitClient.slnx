@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/Tests/">
+    <Project Path="tests/TechTeaStudio.GitClient.Core.Tests/TechTeaStudio.GitClient.Core.Tests.csproj" />
+  </Folder>
+  <Project Path="src/TechTeaStudio.GitClient.Core/TechTeaStudio.GitClient.Core.csproj" />
+  <Project Path="src/TechTeaStudio.GitClient.App/TechTeaStudio.GitClient.App.csproj" />
+</Solution>
