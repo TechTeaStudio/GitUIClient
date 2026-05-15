@@ -137,6 +137,9 @@ public sealed class MainViewModelTests
                 },
             });
 
+        public Task<IReadOnlyList<CommitInfo>> GetAllCommitsAsync(IRepoHandle handle, int take, CancellationToken ct = default)
+            => GetCommitsAsync(handle, "HEAD", take, ct);
+
         public Task<string> GetDiffAsync(IRepoHandle handle, string fromSha, string toSha, CancellationToken ct = default)
             => Task.FromResult("diff --stub");
 

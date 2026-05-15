@@ -77,6 +77,46 @@ public sealed class RepositoryServiceTests
     }
 
     [Fact]
+    public async Task GetAllCommitsAsync_includes_commits_from_every_branch()
+    {
+        using var temp = new TempRepoDir();
+        var svc = new LibGit2RepositoryService();
+        var commitSvc = new LibGit2CommitService();
+
+        using var handle = await svc.InitAsync(temp.Path);
+        WriteFile(temp.Path, "a.txt", "a");
+        await commitSvc.CommitAsync(handle, "root", TestAuthor());
+
+        // The public service API doesn't expose checkout/branch yet (v0.1.0 scope),
+        // so we drive LibGit2Sharp directly to build the side branch state on disk.
+        // The handle's repository on disk is shared.
+        string sideSha;
+        string mainSha;
+        using (var rawRepo = new Repository(temp.Path))
+        {
+            var sideBranch = rawRepo.CreateBranch("side");
+            Commands.Checkout(rawRepo, sideBranch);
+        }
+        WriteFile(temp.Path, "side.txt", "side");
+        var sideCommit = await commitSvc.CommitAsync(handle, "side tip", TestAuthor());
+        sideSha = sideCommit.Sha;
+
+        using (var rawRepo = new Repository(temp.Path))
+        {
+            var mainBranch = rawRepo.Branches.First(b => b.FriendlyName != "side");
+            Commands.Checkout(rawRepo, mainBranch);
+        }
+        WriteFile(temp.Path, "main.txt", "main");
+        var mainCommit = await commitSvc.CommitAsync(handle, "main tip", TestAuthor());
+        mainSha = mainCommit.Sha;
+
+        var all = await svc.GetAllCommitsAsync(handle, 50);
+
+        Assert.Contains(all, c => c.Sha == sideSha);
+        Assert.Contains(all, c => c.Sha == mainSha);
+    }
+
+    [Fact]
     public async Task GetStatusAsync_lists_untracked_files()
     {
         using var temp = new TempRepoDir();

@@ -5,7 +5,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>TechTeaStudio.GitClient.App</RootNamespace>
     <AssemblyName>TechTeaStudio.GitClient.App</AssemblyName>
-    <Version>0.1.0</Version>
+    <Version>0.2.0</Version>
     <Description>Avalonia front-end for the TechTeaStudio Git client.</Description>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
@@ -18,6 +18,8 @@
     <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.15" />
     <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.15" />
     <PackageReference Include="Avalonia.Diagnostics" Version="11.3.15" Condition="'$(Configuration)' == 'Debug'" />
+    <PackageReference Include="Material.Avalonia" Version="3.9.2" />
+    <PackageReference Include="Material.Icons.Avalonia" Version="2.4.0" />
   </ItemGroup>
 
   <ItemGroup>

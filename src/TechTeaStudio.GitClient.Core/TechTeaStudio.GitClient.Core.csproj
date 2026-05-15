@@ -4,7 +4,7 @@
     <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
     <RootNamespace>TechTeaStudio.GitClient</RootNamespace>
     <AssemblyName>TechTeaStudio.GitClient.Core</AssemblyName>
-    <Version>0.1.0</Version>
+    <Version>0.2.0</Version>
     <Description>Core library wrapping LibGit2Sharp for repository read/commit operations.</Description>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>

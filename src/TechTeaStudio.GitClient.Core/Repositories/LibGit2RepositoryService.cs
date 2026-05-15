@@ -149,6 +149,46 @@ public sealed class LibGit2RepositoryService : IRepositoryService
         }
     }
 
+    public async Task<IReadOnlyList<CommitInfo>> GetAllCommitsAsync(
+        IRepoHandle handle,
+        int take,
+        CancellationToken ct = default)
+    {
+        if (take <= 0) return Array.Empty<CommitInfo>();
+
+        var h = CastHandle(handle);
+        await h.AsyncLock.WaitAsync(ct).ConfigureAwait(false);
+        try
+        {
+            var repo = h.Repository;
+            var tips = new List<Commit>();
+            var seen = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var branch in repo.Branches)
+            {
+                if (branch.Tip is { } tip && seen.Add(tip.Sha))
+                    tips.Add(tip);
+            }
+            if (tips.Count == 0) return Array.Empty<CommitInfo>();
+
+            var filter = new CommitFilter
+            {
+                IncludeReachableFrom = tips,
+                SortBy = CommitSortStrategies.Topological | CommitSortStrategies.Time,
+            };
+            var list = new List<CommitInfo>(take);
+            foreach (var c in repo.Commits.QueryBy(filter).Take(take))
+            {
+                ct.ThrowIfCancellationRequested();
+                list.Add(MapCommit(c));
+            }
+            return list;
+        }
+        finally
+        {
+            h.AsyncLock.Release();
+        }
+    }
+
     public async Task<string> GetDiffAsync(IRepoHandle handle, string fromSha, string toSha, CancellationToken ct = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(fromSha);

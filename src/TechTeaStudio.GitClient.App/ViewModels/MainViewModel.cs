@@ -2,6 +2,9 @@ namespace TechTeaStudio.GitClient.App.ViewModels;
 
 using System.Collections.ObjectModel;
 
+using Avalonia.Threading;
+using TechTeaStudio.GitClient.App.Graph;
+using TechTeaStudio.GitClient.App.Services;
 using TechTeaStudio.GitClient.Models;
 using TechTeaStudio.GitClient.Repositories;
 
@@ -18,6 +21,7 @@ public sealed class MainViewModel : ObservableObject
 {
     private readonly IRepositoryService _repos;
     private readonly ICommitService _commits;
+    private readonly IGravatarService? _gravatar;
 
     private IRepoHandle? _handle;
     private CancellationTokenSource _cts = new();
@@ -30,10 +34,11 @@ public sealed class MainViewModel : ObservableObject
     private BranchInfo? _selectedBranch;
     private CommitListItem? _selectedCommit;
 
-    public MainViewModel(IRepositoryService repositories, ICommitService commits)
+    public MainViewModel(IRepositoryService repositories, ICommitService commits, IGravatarService? gravatar = null)
     {
         _repos = repositories ?? throw new ArgumentNullException(nameof(repositories));
         _commits = commits ?? throw new ArgumentNullException(nameof(commits));
+        _gravatar = gravatar;
 
         OpenCommand = new RelayCommand(OpenAsync, () => !IsBusy && !string.IsNullOrWhiteSpace(Path));
         CloneCommand = new RelayCommand(CloneAsync,
@@ -56,7 +61,7 @@ public sealed class MainViewModel : ObservableObject
         };
     }
 
-    public string Greeting => "TechTeaStudio Git Client — v0.1.0";
+    public string Greeting => "TechTeaStudio Git Client — v0.2.0";
 
     public string Path { get => _path; set => SetField(ref _path, value); }
     public string CloneUrl { get => _cloneUrl; set => SetField(ref _cloneUrl, value); }
@@ -117,13 +122,24 @@ public sealed class MainViewModel : ObservableObject
         }).ConfigureAwait(false);
     }
 
-    public async Task CloneAsync()
+    public Task CloneAsync() => CloneAsync(CloneUrl, Path);
+
+    public async Task CloneAsync(string url, string destinationPath)
     {
+        if (string.IsNullOrWhiteSpace(url) || string.IsNullOrWhiteSpace(destinationPath))
+        {
+            StatusMessage = "Clone needs both URL and destination path.";
+            return;
+        }
+
+        CloneUrl = url;
+        Path = destinationPath;
+
         var ct = RestartCts();
         await RunBusy(async () =>
         {
             DisposeHandle();
-            _handle = await _repos.CloneAsync(CloneUrl, Path, progress: null, ct).ConfigureAwait(false);
+            _handle = await _repos.CloneAsync(url, destinationPath, progress: null, ct).ConfigureAwait(false);
             await RefreshInternalAsync(ct).ConfigureAwait(false);
             StatusMessage = $"Cloned into: {_handle.WorkingDirectory}";
         }).ConfigureAwait(false);
@@ -168,49 +184,101 @@ public sealed class MainViewModel : ObservableObject
         }).ConfigureAwait(false);
     }
 
+    /// <summary>Sentinel branch entry meaning "every branch reachable in one DAG view".</summary>
+    public static readonly BranchInfo AllBranchesSentinel = new()
+    {
+        Name = "(all branches)",
+        TipSha = string.Empty,
+        IsCurrent = false,
+        IsRemote = false,
+    };
+
+    public static bool IsAllBranches(BranchInfo? b) => ReferenceEquals(b, AllBranchesSentinel);
+
     private async Task LoadCommitsForSelectedBranchAsync()
     {
         if (_handle is null || _selectedBranch is null) return;
         var ct = RestartCts();
         await RunBusy(async () =>
         {
-            var commits = await _repos.GetCommitsAsync(_handle, _selectedBranch.Name, 50, ct)
-                .ConfigureAwait(false);
-            Commits.Clear();
-            foreach (var c in commits) Commits.Add(new CommitListItem(c));
-            SelectedCommit = Commits.FirstOrDefault();
+            var commits = await FetchCommitsAsync(_selectedBranch, ct).ConfigureAwait(false);
+            PopulateCommits(commits);
         }).ConfigureAwait(false);
     }
+
+    private Task<IReadOnlyList<CommitInfo>> FetchCommitsAsync(BranchInfo branch, CancellationToken ct)
+        => IsAllBranches(branch)
+            ? _repos.GetAllCommitsAsync(_handle!, 200, ct)
+            : _repos.GetCommitsAsync(_handle!, branch.Name, 200, ct);
 
     private async Task RefreshInternalAsync(CancellationToken ct)
     {
         if (_handle is null) return;
 
+        var previousSelectionName = _selectedBranch?.Name;
+
         var branches = await _repos.GetBranchesAsync(_handle, ct).ConfigureAwait(false);
         Branches.Clear();
+        Branches.Add(AllBranchesSentinel);
         foreach (var b in branches) Branches.Add(b);
-        _selectedBranch = branches.FirstOrDefault(b => b.IsCurrent) ?? branches.FirstOrDefault();
+
+        // Preserve the previous selection across refreshes when it still exists, otherwise
+        // default to the unified all-branches view so the whole DAG is visible.
+        _selectedBranch = previousSelectionName is null
+            ? AllBranchesSentinel
+            : Branches.FirstOrDefault(b => b.Name == previousSelectionName) ?? AllBranchesSentinel;
         OnPropertyChanged(nameof(SelectedBranch));
 
-        if (_selectedBranch is not null)
-        {
-            var commits = await _repos.GetCommitsAsync(_handle, _selectedBranch.Name, 50, ct)
-                .ConfigureAwait(false);
-            Commits.Clear();
-            foreach (var c in commits) Commits.Add(new CommitListItem(c));
-            SelectedCommit = Commits.FirstOrDefault();
-        }
-        else
-        {
-            Commits.Clear();
-            SelectedCommit = null;
-        }
+        var commits = await FetchCommitsAsync(_selectedBranch, ct).ConfigureAwait(false);
+        PopulateCommits(commits);
 
         var status = await _repos.GetStatusAsync(_handle, ct).ConfigureAwait(false);
         Replace(Added, status.Added);
         Replace(Modified, status.Modified);
         Replace(Deleted, status.Deleted);
         Replace(Untracked, status.Untracked);
+    }
+
+    private void PopulateCommits(IReadOnlyList<CommitInfo> commits)
+    {
+        Commits.Clear();
+        var items = new List<CommitListItem>(commits.Count);
+        foreach (var c in commits) items.Add(new CommitListItem(c));
+
+        var rows = CommitGraphBuilder.Build(commits);
+        for (int i = 0; i < items.Count && i < rows.Count; i++)
+        {
+            items[i].GraphRow = rows[i];
+        }
+
+        foreach (var item in items) Commits.Add(item);
+        SelectedCommit = Commits.FirstOrDefault();
+
+        if (_gravatar is not null)
+        {
+            foreach (var item in items)
+            {
+                _ = DispatchAvatarFetchAsync(item);
+            }
+        }
+    }
+
+    private async Task DispatchAvatarFetchAsync(CommitListItem item)
+    {
+        if (_gravatar is null) return;
+        try
+        {
+            var bitmap = await _gravatar.GetAvatarAsync(item.Email, size: 64).ConfigureAwait(false);
+            if (bitmap is null) return;
+            if (Dispatcher.UIThread.CheckAccess())
+                item.Avatar = bitmap;
+            else
+                await Dispatcher.UIThread.InvokeAsync(() => item.Avatar = bitmap);
+        }
+        catch
+        {
+            // Avatar is decorative — silently swallow.
+        }
     }
 
     private static void Replace(ObservableCollection<FileSelection> target, IReadOnlyList<FileChange> source)

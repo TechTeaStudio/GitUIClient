@@ -31,6 +31,15 @@ public interface IRepositoryService
         int take,
         CancellationToken ct = default);
 
+    /// <summary>
+    /// Most-recent <paramref name="take"/> commits reachable from ANY local branch tip,
+    /// topo+time sorted — the "git log --all" view used to draw the full DAG.
+    /// </summary>
+    Task<IReadOnlyList<CommitInfo>> GetAllCommitsAsync(
+        IRepoHandle handle,
+        int take,
+        CancellationToken ct = default);
+
     /// <summary>Unified diff (patch) between two commit shas.</summary>
     Task<string> GetDiffAsync(IRepoHandle handle, string fromSha, string toSha, CancellationToken ct = default);
 
