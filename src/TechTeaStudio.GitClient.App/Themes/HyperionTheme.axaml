@@ -1,0 +1,153 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!--
+    HyperionTheme.axaml — single source of truth for the GitClient palette.
+
+    Two variants live side by side under ThemeDictionaries: Dark (default) and
+    Light. The application reads the active dictionary via DynamicResource so
+    every brush flips when the user toggles the theme.
+
+    Naming:
+      Hyperion.*        legacy MD3 palette tokens consumed by Material.Avalonia
+                        overrides in App.axaml — kept for compatibility with
+                        the existing dialog markup.
+      Glass.*           liquid-glass tokens (translucent surfaces, rim borders,
+                        acrylic tints, soft shadows) consumed by the custom
+                        window chrome and the new card styles.
+      Chrome.*          custom title-bar and window-control tokens.
+
+    Add new tokens HERE — not in App.axaml or in individual views. Keeping the
+    palette in one file is what makes the light / dark switch a one-line edit.
+  -->
+  <ResourceDictionary.ThemeDictionaries>
+
+    <!-- ====== DARK ====== -->
+    <ResourceDictionary x:Key="Dark">
+
+      <!-- Hyperion MD3 night palette (consumed by Material.Avalonia overrides). -->
+      <Color x:Key="HyperionPrimary">#9D2499</Color>
+      <Color x:Key="HyperionPrimary600">#7F1E7D</Color>
+      <Color x:Key="HyperionPrimary700">#671966</Color>
+      <Color x:Key="HyperionTertiary">#5EC6C6</Color>
+      <Color x:Key="HyperionTertiaryDark">#2A8F8F</Color>
+
+      <Color x:Key="HyperionSurfaceBase">#121218</Color>
+      <Color x:Key="HyperionSurfaceCard">#2A2A2A</Color>
+      <Color x:Key="HyperionSurfaceDialog">#1E1E2E</Color>
+      <Color x:Key="HyperionSurfaceElevated">#252535</Color>
+      <Color x:Key="HyperionBorder">#333333</Color>
+
+      <Color x:Key="HyperionDanger">#EF5350</Color>
+      <Color x:Key="HyperionSuccess">#4CAF50</Color>
+      <Color x:Key="HyperionWarning">#FF9800</Color>
+      <Color x:Key="HyperionInfo">#29B6F6</Color>
+
+      <SolidColorBrush x:Key="HyperionPrimaryBrush"          Color="{StaticResource HyperionPrimary}" />
+      <SolidColorBrush x:Key="HyperionPrimary700Brush"       Color="{StaticResource HyperionPrimary700}" />
+      <SolidColorBrush x:Key="HyperionTertiaryBrush"         Color="{StaticResource HyperionTertiary}" />
+      <SolidColorBrush x:Key="HyperionSurfaceBaseBrush"      Color="{StaticResource HyperionSurfaceBase}" />
+      <SolidColorBrush x:Key="HyperionSurfaceCardBrush"      Color="{StaticResource HyperionSurfaceCard}" />
+      <SolidColorBrush x:Key="HyperionSurfaceDialogBrush"    Color="{StaticResource HyperionSurfaceDialog}" />
+      <SolidColorBrush x:Key="HyperionSurfaceElevatedBrush"  Color="{StaticResource HyperionSurfaceElevated}" />
+      <SolidColorBrush x:Key="HyperionBorderBrush"           Color="{StaticResource HyperionBorder}" />
+      <SolidColorBrush x:Key="HyperionDangerBrush"           Color="{StaticResource HyperionDanger}" />
+      <SolidColorBrush x:Key="HyperionSuccessBrush"          Color="{StaticResource HyperionSuccess}" />
+      <SolidColorBrush x:Key="HyperionWarningBrush"          Color="{StaticResource HyperionWarning}" />
+      <SolidColorBrush x:Key="HyperionInfoBrush"             Color="{StaticResource HyperionInfo}" />
+
+      <SolidColorBrush x:Key="HyperionTextHigh"   Color="White" Opacity="0.92" />
+      <SolidColorBrush x:Key="HyperionTextMedium" Color="White" Opacity="0.65" />
+      <SolidColorBrush x:Key="HyperionTextLow"    Color="White" Opacity="0.38" />
+
+      <Color x:Key="HyperionDotEdge">#121218</Color>
+
+      <!-- Glass: translucent surfaces layered over the acrylic backdrop. The
+           BackdropTint is what ExperimentalAcrylicMaterial tints the host blur
+           with; CardFill is the semi-opaque card body that floats above. -->
+      <Color x:Key="Glass.BackdropTintColor">#0F0F18</Color>
+      <SolidColorBrush x:Key="Glass.BackdropTint"     Color="#0F0F18" />
+      <SolidColorBrush x:Key="Glass.CardFill"         Color="#80222232" />
+      <SolidColorBrush x:Key="Glass.CardFillStrong"   Color="#A0222232" />
+      <SolidColorBrush x:Key="Glass.SurfaceFill"      Color="#60181822" />
+      <SolidColorBrush x:Key="Glass.OverlayHover"     Color="#1AFFFFFF" />
+      <SolidColorBrush x:Key="Glass.OverlayPressed"   Color="#33FFFFFF" />
+      <SolidColorBrush x:Key="Glass.RimSoft"          Color="#33FFFFFF" />
+      <SolidColorBrush x:Key="Glass.RimStrong"        Color="#66FFFFFF" />
+      <SolidColorBrush x:Key="Glass.Divider"          Color="#22FFFFFF" />
+      <BoxShadows      x:Key="Glass.CardShadow">0 6 24 0 #99000000</BoxShadows>
+      <BoxShadows      x:Key="Glass.ChromeShadow">0 1 0 0 #44FFFFFF inset, 0 2 12 0 #88000000</BoxShadows>
+
+      <!-- Chrome: custom title bar tokens. -->
+      <SolidColorBrush x:Key="Chrome.TitleBarFill"    Color="#33000000" />
+      <SolidColorBrush x:Key="Chrome.ButtonHover"     Color="#1AFFFFFF" />
+      <SolidColorBrush x:Key="Chrome.ButtonPressed"   Color="#33FFFFFF" />
+      <SolidColorBrush x:Key="Chrome.CloseHover"      Color="#E81123" />
+      <SolidColorBrush x:Key="Chrome.Foreground"      Color="White" Opacity="0.85" />
+
+    </ResourceDictionary>
+
+    <!-- ====== LIGHT ====== -->
+    <ResourceDictionary x:Key="Light">
+
+      <!-- Hyperion-aligned day palette. -->
+      <Color x:Key="HyperionPrimary">#9D2499</Color>
+      <Color x:Key="HyperionPrimary600">#7F1E7D</Color>
+      <Color x:Key="HyperionPrimary700">#671966</Color>
+      <Color x:Key="HyperionTertiary">#2A8F8F</Color>
+      <Color x:Key="HyperionTertiaryDark">#1A6A6A</Color>
+
+      <Color x:Key="HyperionSurfaceBase">#F5F5F7</Color>
+      <Color x:Key="HyperionSurfaceCard">#FFFFFF</Color>
+      <Color x:Key="HyperionSurfaceDialog">#FAFAFA</Color>
+      <Color x:Key="HyperionSurfaceElevated">#F0F0F2</Color>
+      <Color x:Key="HyperionBorder">#E0E0E0</Color>
+
+      <Color x:Key="HyperionDanger">#C62828</Color>
+      <Color x:Key="HyperionSuccess">#2E7D32</Color>
+      <Color x:Key="HyperionWarning">#EF6C00</Color>
+      <Color x:Key="HyperionInfo">#0277BD</Color>
+
+      <SolidColorBrush x:Key="HyperionPrimaryBrush"          Color="{StaticResource HyperionPrimary}" />
+      <SolidColorBrush x:Key="HyperionPrimary700Brush"       Color="{StaticResource HyperionPrimary700}" />
+      <SolidColorBrush x:Key="HyperionTertiaryBrush"         Color="{StaticResource HyperionTertiary}" />
+      <SolidColorBrush x:Key="HyperionSurfaceBaseBrush"      Color="{StaticResource HyperionSurfaceBase}" />
+      <SolidColorBrush x:Key="HyperionSurfaceCardBrush"      Color="{StaticResource HyperionSurfaceCard}" />
+      <SolidColorBrush x:Key="HyperionSurfaceDialogBrush"    Color="{StaticResource HyperionSurfaceDialog}" />
+      <SolidColorBrush x:Key="HyperionSurfaceElevatedBrush"  Color="{StaticResource HyperionSurfaceElevated}" />
+      <SolidColorBrush x:Key="HyperionBorderBrush"           Color="{StaticResource HyperionBorder}" />
+      <SolidColorBrush x:Key="HyperionDangerBrush"           Color="{StaticResource HyperionDanger}" />
+      <SolidColorBrush x:Key="HyperionSuccessBrush"          Color="{StaticResource HyperionSuccess}" />
+      <SolidColorBrush x:Key="HyperionWarningBrush"          Color="{StaticResource HyperionWarning}" />
+      <SolidColorBrush x:Key="HyperionInfoBrush"             Color="{StaticResource HyperionInfo}" />
+
+      <SolidColorBrush x:Key="HyperionTextHigh"   Color="Black" Opacity="0.92" />
+      <SolidColorBrush x:Key="HyperionTextMedium" Color="Black" Opacity="0.65" />
+      <SolidColorBrush x:Key="HyperionTextLow"    Color="Black" Opacity="0.38" />
+
+      <Color x:Key="HyperionDotEdge">#FFFFFF</Color>
+
+      <!-- Glass — day variant: very pale acrylic tint, near-white cards, soft black rims. -->
+      <Color x:Key="Glass.BackdropTintColor">#FAFAFC</Color>
+      <SolidColorBrush x:Key="Glass.BackdropTint"     Color="#FAFAFC" />
+      <SolidColorBrush x:Key="Glass.CardFill"         Color="#CCFFFFFF" />
+      <SolidColorBrush x:Key="Glass.CardFillStrong"   Color="#E6FFFFFF" />
+      <SolidColorBrush x:Key="Glass.SurfaceFill"      Color="#99F0F0F4" />
+      <SolidColorBrush x:Key="Glass.OverlayHover"     Color="#11000000" />
+      <SolidColorBrush x:Key="Glass.OverlayPressed"   Color="#22000000" />
+      <SolidColorBrush x:Key="Glass.RimSoft"          Color="#22000000" />
+      <SolidColorBrush x:Key="Glass.RimStrong"        Color="#44000000" />
+      <SolidColorBrush x:Key="Glass.Divider"          Color="#1A000000" />
+      <BoxShadows      x:Key="Glass.CardShadow">0 6 24 0 #22000000</BoxShadows>
+      <BoxShadows      x:Key="Glass.ChromeShadow">0 1 0 0 #66FFFFFF inset, 0 2 12 0 #33000000</BoxShadows>
+
+      <!-- Chrome — day variant. -->
+      <SolidColorBrush x:Key="Chrome.TitleBarFill"    Color="#11000000" />
+      <SolidColorBrush x:Key="Chrome.ButtonHover"     Color="#11000000" />
+      <SolidColorBrush x:Key="Chrome.ButtonPressed"   Color="#22000000" />
+      <SolidColorBrush x:Key="Chrome.CloseHover"      Color="#E81123" />
+      <SolidColorBrush x:Key="Chrome.Foreground"      Color="Black" Opacity="0.85" />
+
+    </ResourceDictionary>
+
+  </ResourceDictionary.ThemeDictionaries>
+</ResourceDictionary>

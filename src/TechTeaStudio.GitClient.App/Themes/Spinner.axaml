@@ -1,0 +1,36 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mi="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia">
+
+  <!--
+    Spinner style. Animates the Angle of a RotateTransform via the
+    (RotateTransform.Angle) reach-in path. Avalonia cannot interpolate
+    RenderTransform as a whole, only scalar sub-properties.
+
+    IMPORTANT: each consumer MUST assign its own RotateTransform inline:
+
+        <mi:MaterialIcon Classes="spinner" Kind="Loading" ...>
+          <mi:MaterialIcon.RenderTransform>
+            <RotateTransform />
+          </mi:MaterialIcon.RenderTransform>
+        </mi:MaterialIcon>
+
+    If RenderTransform is set by a Style Setter instead, every matching
+    control shares the same RotateTransform instance and the animation only
+    drives one of them.
+  -->
+  <Style Selector="mi|MaterialIcon.spinner">
+    <Setter Property="RenderTransformOrigin" Value="50%, 50%" />
+    <Style.Animations>
+      <Animation Duration="0:0:1.2" IterationCount="Infinite">
+        <KeyFrame Cue="0%">
+          <Setter Property="(RotateTransform.Angle)" Value="0.0" />
+        </KeyFrame>
+        <KeyFrame Cue="100%">
+          <Setter Property="(RotateTransform.Angle)" Value="360.0" />
+        </KeyFrame>
+      </Animation>
+    </Style.Animations>
+  </Style>
+
+</Styles>

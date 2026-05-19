@@ -3,6 +3,29 @@
 All notable changes to this project are documented here.
 Format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] — 2026-05-19
+
+UI overhaul: chromeless custom title bar, liquid-glass acrylic backdrop, single-file palette, repo-aware gating, custom icon set, loading spinners.
+
+### Added
+- Custom window chrome: `SystemDecorations="None"` + `ExtendClientAreaToDecorationsHint`. Own 36-px title bar with drag region, app icon, title, repo path, and min / max / close buttons. Double-click toggles maximize.
+- Liquid-glass backdrop: `ExperimentalAcrylicBorder` with host-OS blur (`AcrylicBlur, Mica, Blur`); semi-transparent cards with soft rims, rounded corners, drop shadows.
+- `Themes/HyperionTheme.axaml`: single source of truth for all palette tokens (`Hyperion.*`, `Glass.*`, `Chrome.*`) under `Dark` + `Light` `ThemeDictionaries`. App-bar toggle flips the active variant.
+- `Themes/Spinner.axaml`: rotating `MaterialIcon` style. Big spinner on empty state during Open / Clone / Init; inline spinners next to BRANCH and COMMITS headers while history loads.
+- `MainViewModel.HasRepository` property. Every repo-dependent menu (Repo / Branch / Tag / Commit / Rewrite / Inspect) is gated via `IsEnabled="{Binding HasRepository}"`. Workspace is replaced with a centred Branches glyph and OPEN / CLONE / INIT buttons when no repo is open.
+- Custom icon set in `Assets/Icons/`: 8 × 512 px PNGs (`branch`, `branches`, `commit-git`, `compare`, `delete`, `deployment`, `merge`, `pull`) wired into menu items and the Commit button.
+- `Assets/app.ico`: multi-resolution Windows icon (16 / 24 / 32 / 48 / 64 / 128 / 256) built from `branches.png`. Set as `<ApplicationIcon>` so the EXE / taskbar / file explorer pick it up. `branches.png` is the `Window.Icon` and the README header logo.
+- `RunBusy` yields once after setting `IsBusy = true` so the UI dispatcher renders the busy state before LibGit2's synchronous work starts.
+
+### Changed
+- `App.axaml`: palette tokens extracted to `Themes/HyperionTheme.axaml`; only Material brush overrides and the `Window` selector remain inline.
+- README rewritten in the HOC dry style: dropped "When to reach for it", "How it compares", "Roadmap" sections and the long tagline. Factual sections only.
+- `Window.Background="Transparent"` plus `TransparencyLevelHint="AcrylicBlur, Mica, Blur, None"` so the acrylic backdrop shows through.
+
+### Removed
+- `PLAN.md`, `ARCHITECT_REVIEW.md` (sub-agent pipeline artefacts).
+- The CHANGELOG `[0.1.0]` line mentioning `PLAN.md` documenting the three-worker partition.
+
 ## [0.3.0] — 2026-05-15
 
 Feature-parity push toward Gitter_TTS. Six clusters built in parallel by sub-agents (each in its own git worktree), then merged into `product`.

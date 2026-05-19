@@ -6,24 +6,39 @@
         x:Class="TechTeaStudio.GitClient.App.Views.MainWindow"
         x:DataType="vm:MainViewModel"
         Title="TechTeaStudio Git Client"
+        Icon="avares://TechTeaStudio.GitClient.App/Assets/Icons/branches.png"
         Width="1180" Height="720"
+        MinWidth="900" MinHeight="560"
         WindowStartupLocation="CenterScreen"
-        Background="{DynamicResource HyperionSurfaceBaseBrush}"
+        Background="Transparent"
+        TransparencyLevelHint="AcrylicBlur, Mica, Blur, None"
+        SystemDecorations="None"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaChromeHints="NoChrome"
+        ExtendClientAreaTitleBarHeightHint="-1"
         Foreground="{DynamicResource HyperionTextHigh}"
         FontSize="12">
 
   <Window.Styles>
+    <!-- Liquid-glass card: semi-transparent fill, soft rim, rounded corners,
+         drop shadow. Designed to sit over the ExperimentalAcrylicBorder. -->
     <Style Selector="Border.card">
-      <Setter Property="Background" Value="{DynamicResource HyperionSurfaceCardBrush}" />
-      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="Background" Value="{DynamicResource Glass.CardFill}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource Glass.RimSoft}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="12" />
       <Setter Property="Padding" Value="10" />
-      <Setter Property="BoxShadow" Value="0 1 3 0 #44000000" />
+      <Setter Property="BoxShadow" Value="{DynamicResource Glass.CardShadow}" />
     </Style>
+
+    <!-- App bar: header strip with the title / status — translucent. -->
     <Style Selector="Border.appbar">
-      <Setter Property="Background" Value="{DynamicResource HyperionSurfaceDialogBrush}" />
+      <Setter Property="Background" Value="{DynamicResource Glass.SurfaceFill}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource Glass.Divider}" />
+      <Setter Property="BorderThickness" Value="0,0,0,1" />
       <Setter Property="Padding" Value="12,6" />
-      <Setter Property="BoxShadow" Value="0 1 4 0 #66000000" />
     </Style>
+
     <Style Selector="TextBlock.section">
       <Setter Property="FontWeight" Value="SemiBold" />
       <Setter Property="FontSize" Value="10" />
@@ -51,6 +66,29 @@
       <Setter Property="MinHeight" Value="32" />
       <Setter Property="FontSize" Value="11" />
     </Style>
+
+    <!-- Custom window control buttons (min / max / close). Square, no chrome,
+         coloured hover. The .close variant turns red on hover like the Windows
+         convention. -->
+    <Style Selector="Button.chromeBtn">
+      <Setter Property="Width" Value="46" />
+      <Setter Property="Height" Value="32" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="CornerRadius" Value="0" />
+      <Setter Property="Foreground" Value="{DynamicResource Chrome.Foreground}" />
+    </Style>
+    <Style Selector="Button.chromeBtn:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource Chrome.ButtonHover}" />
+    </Style>
+    <Style Selector="Button.chromeBtn:pressed /template/ ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource Chrome.ButtonPressed}" />
+    </Style>
+    <Style Selector="Button.chromeBtn.close:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource Chrome.CloseHover}" />
+    </Style>
+
     <Style Selector="TextBox">
       <Setter Property="FontSize" Value="12" />
       <Setter Property="MinHeight" Value="36" />
@@ -66,485 +104,654 @@
     </Style>
   </Window.Styles>
 
-  <DockPanel LastChildFill="True">
+  <!-- Outer panel: acrylic backdrop + content layer. -->
+  <Panel>
 
-    <!-- Menu bar -->
-    <Menu DockPanel.Dock="Top" Background="{DynamicResource HyperionSurfaceDialogBrush}">
-      <MenuItem Header="_File">
-        <MenuItem Header="_Open repo…" Click="Open_Click">
-          <MenuItem.Icon><mi:MaterialIcon Kind="FolderOpenOutline" Width="16" Height="16" /></MenuItem.Icon>
-        </MenuItem>
-        <MenuItem Header="_Clone…" Click="Clone_Click">
-          <MenuItem.Icon><mi:MaterialIcon Kind="CloudDownloadOutline" Width="16" Height="16" /></MenuItem.Icon>
-        </MenuItem>
-        <MenuItem Header="_Init new repo…" Click="Init_Click">
-          <MenuItem.Icon><mi:MaterialIcon Kind="FolderPlusOutline" Width="16" Height="16" /></MenuItem.Icon>
-        </MenuItem>
-        <Separator />
-        <MenuItem Header="E_xit" Click="Exit_Click">
-          <MenuItem.Icon><mi:MaterialIcon Kind="ExitToApp" Width="16" Height="16" /></MenuItem.Icon>
-        </MenuItem>
-      </MenuItem>
-      <MenuItem Header="_Repo">
-        <MenuItem Header="_Refresh" Command="{Binding RefreshCommand}">
-          <MenuItem.Icon><mi:MaterialIcon Kind="Refresh" Width="16" Height="16" /></MenuItem.Icon>
-        </MenuItem>
-        <Separator />
-        <MenuItem Header="_Fetch…" Click="Fetch_Click">
-          <MenuItem.Icon><mi:MaterialIcon Kind="CloudDownloadOutline" Width="16" Height="16" /></MenuItem.Icon>
-        </MenuItem>
-        <MenuItem Header="_Pull…" Click="Pull_Click">
-          <MenuItem.Icon><mi:MaterialIcon Kind="CloudSyncOutline" Width="16" Height="16" /></MenuItem.Icon>
-        </MenuItem>
-        <MenuItem Header="P_ush…" Click="Push_Click">
-          <MenuItem.Icon><mi:MaterialIcon Kind="CloudUploadOutline" Width="16" Height="16" /></MenuItem.Icon>
-        </MenuItem>
-        <Separator />
-        <MenuItem Header="_Add remote…" Click="AddRemote_Click" />
-        <MenuItem Header="Re_name remote…" Click="RenameRemote_Click" />
-        <MenuItem Header="_Submodule add…" Click="SubmoduleAdd_Click" />
-        <MenuItem Header="Su_bmodule update…" Click="SubmoduleUpdate_Click" />
-        <Separator />
-        <MenuItem Header="A_pply patch…" Click="ApplyPatch_Click" />
-        <MenuItem Header="Refl_og (HEAD)…" Click="Reflog_Click" />
-        <MenuItem Header="_Contributors…" Click="Contributors_Click" />
-      </MenuItem>
-      <MenuItem Header="_Branch">
-        <MenuItem Header="_Create branch…" Click="CreateBranch_Click">
-          <MenuItem.Icon><mi:MaterialIcon Kind="SourceBranchPlus" Width="16" Height="16" /></MenuItem.Icon>
-        </MenuItem>
-        <MenuItem Header="_Rename branch…" Click="RenameBranch_Click" />
-        <MenuItem Header="_Delete branch…" Click="DeleteBranch_Click">
-          <MenuItem.Icon><mi:MaterialIcon Kind="SourceBranchRemove" Width="16" Height="16" /></MenuItem.Icon>
-        </MenuItem>
-        <MenuItem Header="Check_out selected branch" Click="CheckoutBranch_Click">
-          <MenuItem.Icon><mi:MaterialIcon Kind="SourceBranchCheck" Width="16" Height="16" /></MenuItem.Icon>
-        </MenuItem>
-      </MenuItem>
-      <MenuItem Header="_Tag">
-        <MenuItem Header="_Create tag at selected commit…" Click="CreateTag_Click">
-          <MenuItem.Icon><mi:MaterialIcon Kind="Tag" Width="16" Height="16" /></MenuItem.Icon>
-        </MenuItem>
-        <MenuItem Header="_List tags…" Click="ListTags_Click" />
-      </MenuItem>
-      <MenuItem Header="_Commit">
-        <MenuItem Header="_Amend HEAD…" Click="Amend_Click">
-          <MenuItem.Icon><mi:MaterialIcon Kind="PencilOutline" Width="16" Height="16" /></MenuItem.Icon>
-        </MenuItem>
-        <MenuItem Header="_Stash…" Click="Stash_Click">
-          <MenuItem.Icon><mi:MaterialIcon Kind="Archive" Width="16" Height="16" /></MenuItem.Icon>
-        </MenuItem>
-        <MenuItem Header="_Apply stash 0" Click="StashApply_Click" />
-        <MenuItem Header="_Pop stash 0" Click="StashPop_Click" />
-        <MenuItem Header="_Note on selected commit…" Click="AddNote_Click" />
-        <MenuItem Header="C_lean untracked…" Click="Clean_Click">
-          <MenuItem.Icon><mi:MaterialIcon Kind="Broom" Width="16" Height="16" /></MenuItem.Icon>
-        </MenuItem>
-        <MenuItem Header="C_onflicts…" Click="Conflicts_Click">
-          <MenuItem.Icon><mi:MaterialIcon Kind="AlertOctagonOutline" Width="16" Height="16" /></MenuItem.Icon>
-        </MenuItem>
-      </MenuItem>
-      <MenuItem Header="Re_write">
-        <MenuItem Header="_Merge into current…" Click="Merge_Click">
-          <MenuItem.Icon><mi:MaterialIcon Kind="SourceMerge" Width="16" Height="16" /></MenuItem.Icon>
-        </MenuItem>
-        <MenuItem Header="_Rebase onto…" Click="Rebase_Click">
-          <MenuItem.Icon><mi:MaterialIcon Kind="SourceCommitNextLocal" Width="16" Height="16" /></MenuItem.Icon>
-        </MenuItem>
-        <MenuItem Header="Re_vert selected commit…" Click="Revert_Click">
-          <MenuItem.Icon><mi:MaterialIcon Kind="Undo" Width="16" Height="16" /></MenuItem.Icon>
-        </MenuItem>
-        <MenuItem Header="_Cherry-pick selected…" Click="CherryPick_Click">
-          <MenuItem.Icon><mi:MaterialIcon Kind="FruitCherries" Width="16" Height="16" /></MenuItem.Icon>
-        </MenuItem>
-        <MenuItem Header="Re_set to selected…" Click="Reset_Click">
-          <MenuItem.Icon><mi:MaterialIcon Kind="Restore" Width="16" Height="16" /></MenuItem.Icon>
-        </MenuItem>
-      </MenuItem>
-      <MenuItem Header="_Inspect">
-        <MenuItem Header="_Diff selected vs parent" Click="Diff_Click">
-          <MenuItem.Icon><mi:MaterialIcon Kind="FileCompare" Width="16" Height="16" /></MenuItem.Icon>
-        </MenuItem>
-        <MenuItem Header="_Tree at selected commit" Click="Tree_Click">
-          <MenuItem.Icon><mi:MaterialIcon Kind="FileTree" Width="16" Height="16" /></MenuItem.Icon>
-        </MenuItem>
-        <MenuItem Header="_Blame file at selected…" Click="Blame_Click">
-          <MenuItem.Icon><mi:MaterialIcon Kind="AccountSearchOutline" Width="16" Height="16" /></MenuItem.Icon>
-        </MenuItem>
-      </MenuItem>
-    </Menu>
+    <!-- Liquid-glass acrylic backdrop. Tinted with the theme-aware Glass.BackdropTint
+         so the host-OS blur shows through with the right tonal cast. Hit-test off
+         so it never steals pointer events from the content above. -->
+    <ExperimentalAcrylicBorder IsHitTestVisible="False">
+      <ExperimentalAcrylicBorder.Material>
+        <ExperimentalAcrylicMaterial
+          BackgroundSource="Digger"
+          TintColor="{DynamicResource Glass.BackdropTintColor}"
+          TintOpacity="0.85"
+          MaterialOpacity="0.65" />
+      </ExperimentalAcrylicBorder.Material>
+    </ExperimentalAcrylicBorder>
 
-    <!-- App bar: title + repo-path subtitle + busy + theme -->
-    <Border DockPanel.Dock="Top" Classes="appbar">
-      <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="10">
-        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-          <mi:MaterialIcon Kind="SourceBranch"
-                           Width="18" Height="18"
-                           Foreground="{DynamicResource HyperionPrimaryBrush}" />
-          <TextBlock Text="{Binding Greeting}"
-                     FontSize="14" FontWeight="SemiBold"
-                     Foreground="{DynamicResource HyperionTextHigh}"
-                     VerticalAlignment="Center" />
-        </StackPanel>
+    <DockPanel LastChildFill="True">
 
-        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center"
-                    IsVisible="{Binding Path, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
-          <mi:MaterialIcon Kind="FolderOutline" Width="12" Height="12"
-                           Foreground="{DynamicResource HyperionTextMedium}" />
-          <TextBlock Text="{Binding Path}"
-                     Foreground="{DynamicResource HyperionTextMedium}"
-                     FontSize="11"
-                     TextTrimming="CharacterEllipsis"
-                     MaxWidth="560"
-                     ToolTip.Tip="{Binding Path}"
-                     VerticalAlignment="Center" />
-        </StackPanel>
+      <!-- ====== Custom title bar (replaces system chrome) ====== -->
+      <!-- Drag region: the whole strip is grabbable except for the window buttons.
+           Double-click toggles maximize/restore (Windows convention). -->
+      <Border DockPanel.Dock="Top"
+              Background="{DynamicResource Chrome.TitleBarFill}"
+              BorderBrush="{DynamicResource Glass.Divider}"
+              BorderThickness="0,0,0,1"
+              PointerPressed="OnTitleBarPressed"
+              Height="36">
+        <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto">
+          <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" Margin="10,0,12,0"
+                      VerticalAlignment="Center">
+            <Image Source="avares://TechTeaStudio.GitClient.App/Assets/Icons/branches.png"
+                   Width="18" Height="18" IsHitTestVisible="False" />
+            <TextBlock Text="TechTeaStudio Git Client"
+                       FontSize="12" FontWeight="SemiBold"
+                       Foreground="{DynamicResource Chrome.Foreground}"
+                       VerticalAlignment="Center"
+                       IsHitTestVisible="False" />
+            <TextBlock Text="{Binding Path}"
+                       FontSize="11"
+                       Foreground="{DynamicResource HyperionTextMedium}"
+                       TextTrimming="CharacterEllipsis"
+                       MaxWidth="500"
+                       Margin="12,0,0,0"
+                       VerticalAlignment="Center"
+                       IsVisible="{Binding HasRepository}"
+                       IsHitTestVisible="False" />
+          </StackPanel>
 
-        <Border Grid.Column="2" />
-
-        <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-          <ProgressBar IsIndeterminate="True" Width="80" Height="3"
-                       IsVisible="{Binding IsBusy}"
-                       Foreground="{DynamicResource HyperionTertiaryBrush}" />
-          <Button Classes="icon Flat"
-                  ToolTip.Tip="Toggle dark / light theme"
-                  Click="ThemeToggle_Click">
-            <mi:MaterialIcon x:Name="ThemeToggleIcon"
-                             Kind="WeatherSunny"
-                             Width="18" Height="18" />
+          <Button Grid.Column="2" Classes="chromeBtn" Click="OnWindowMinimize" ToolTip.Tip="Minimize">
+            <mi:MaterialIcon Kind="WindowMinimize" Width="14" Height="14" />
           </Button>
-        </StackPanel>
-      </Grid>
-    </Border>
-
-    <!-- Status bar -->
-    <Border DockPanel.Dock="Bottom"
-            Background="{DynamicResource HyperionSurfaceDialogBrush}"
-            Padding="12,4"
-            BorderBrush="{DynamicResource HyperionBorderBrush}"
-            BorderThickness="0,1,0,0">
-      <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-        <mi:MaterialIcon Kind="InformationOutline" Width="12" Height="12"
-                         Foreground="{DynamicResource HyperionTextMedium}" />
-        <TextBlock Text="{Binding StatusMessage}"
-                   Foreground="{DynamicResource HyperionTextMedium}"
-                   FontSize="11"
-                   VerticalAlignment="Center" />
-      </StackPanel>
-    </Border>
-
-    <Grid Margin="10" RowDefinitions="Auto,*,Auto" RowSpacing="8">
-
-      <!-- Action toolbar -->
-      <Border Grid.Row="0" Classes="card">
-        <StackPanel Orientation="Horizontal" Spacing="6">
-          <Button Classes="Flat action"
-                  Click="Open_Click"
-                  ToolTip.Tip="Open existing repository (folder picker)">
-            <StackPanel Orientation="Horizontal" Spacing="4">
-              <mi:MaterialIcon Kind="FolderOpenOutline" Width="14" Height="14" />
-              <TextBlock Text="OPEN" VerticalAlignment="Center" />
-            </StackPanel>
+          <Button Grid.Column="3" Classes="chromeBtn" Click="OnWindowMaximizeRestore" ToolTip.Tip="Maximize / Restore">
+            <mi:MaterialIcon Kind="WindowMaximize" Width="14" Height="14" />
           </Button>
-
-          <Button Classes="Flat action"
-                  Click="Clone_Click"
-                  ToolTip.Tip="Clone from URL into a folder…">
-            <StackPanel Orientation="Horizontal" Spacing="4">
-              <mi:MaterialIcon Kind="CloudDownloadOutline" Width="14" Height="14" />
-              <TextBlock Text="CLONE" VerticalAlignment="Center" />
-            </StackPanel>
-          </Button>
-
-          <Button Command="{Binding RefreshCommand}"
-                  Classes="Outline action"
-                  ToolTip.Tip="Reload branches / commits / status">
-            <StackPanel Orientation="Horizontal" Spacing="4">
-              <mi:MaterialIcon Kind="Refresh" Width="14" Height="14" />
-              <TextBlock Text="REFRESH" VerticalAlignment="Center" />
-            </StackPanel>
-          </Button>
-        </StackPanel>
-      </Border>
-
-      <!-- Main 3-column area -->
-      <Grid Grid.Row="1" ColumnDefinitions="200,2*,1.4*" ColumnSpacing="8">
-
-        <!-- Left: branches + working tree -->
-        <Border Grid.Column="0" Classes="card">
-          <Grid RowDefinitions="Auto,Auto,Auto,*" RowSpacing="6">
-            <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="4">
-              <mi:MaterialIcon Kind="SourceBranch" Width="12" Height="12"
-                               Foreground="{DynamicResource HyperionTextHigh}" />
-              <TextBlock Text="BRANCH" Classes="section" />
-            </StackPanel>
-            <ComboBox Grid.Row="1"
-                      ItemsSource="{Binding Branches}"
-                      SelectedItem="{Binding SelectedBranch, Mode=TwoWay}"
-                      HorizontalAlignment="Stretch">
-              <ComboBox.ItemTemplate>
-                <DataTemplate>
-                  <StackPanel Orientation="Horizontal" Spacing="6">
-                    <mi:MaterialIcon Kind="SourceBranch" Width="12" Height="12"
-                                     Foreground="{DynamicResource HyperionTertiaryBrush}" />
-                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center" FontSize="11" />
-                  </StackPanel>
-                </DataTemplate>
-              </ComboBox.ItemTemplate>
-            </ComboBox>
-
-            <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="4" Margin="0,6,0,0">
-              <mi:MaterialIcon Kind="FileTree" Width="12" Height="12"
-                               Foreground="{DynamicResource HyperionTextHigh}" />
-              <TextBlock Text="WORKING TREE" Classes="section" />
-            </StackPanel>
-
-            <ScrollViewer Grid.Row="3">
-              <StackPanel Spacing="8">
-
-                <StackPanel IsVisible="{Binding Modified.Count}">
-                  <Border Classes="statusBadge" Background="{DynamicResource HyperionWarningBrush}"
-                          HorizontalAlignment="Left">
-                    <StackPanel Orientation="Horizontal" Spacing="3">
-                      <mi:MaterialIcon Kind="PencilOutline" Width="10" Height="10" Foreground="Black" />
-                      <TextBlock Text="MODIFIED" Foreground="Black" FontSize="9" FontWeight="Bold"
-                                 VerticalAlignment="Center" />
-                    </StackPanel>
-                  </Border>
-                  <ItemsControl ItemsSource="{Binding Modified}">
-                    <ItemsControl.ItemTemplate>
-                      <DataTemplate>
-                        <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}"
-                                  Content="{Binding Path}" />
-                      </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                  </ItemsControl>
-                </StackPanel>
-
-                <StackPanel IsVisible="{Binding Added.Count}">
-                  <Border Classes="statusBadge" Background="{DynamicResource HyperionSuccessBrush}"
-                          HorizontalAlignment="Left">
-                    <StackPanel Orientation="Horizontal" Spacing="3">
-                      <mi:MaterialIcon Kind="PlusCircleOutline" Width="10" Height="10" Foreground="Black" />
-                      <TextBlock Text="ADDED" Foreground="Black" FontSize="9" FontWeight="Bold"
-                                 VerticalAlignment="Center" />
-                    </StackPanel>
-                  </Border>
-                  <ItemsControl ItemsSource="{Binding Added}">
-                    <ItemsControl.ItemTemplate>
-                      <DataTemplate>
-                        <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}"
-                                  Content="{Binding Path}" />
-                      </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                  </ItemsControl>
-                </StackPanel>
-
-                <StackPanel IsVisible="{Binding Deleted.Count}">
-                  <Border Classes="statusBadge" Background="{DynamicResource HyperionDangerBrush}"
-                          HorizontalAlignment="Left">
-                    <StackPanel Orientation="Horizontal" Spacing="3">
-                      <mi:MaterialIcon Kind="MinusCircleOutline" Width="10" Height="10" Foreground="White" />
-                      <TextBlock Text="DELETED" Foreground="White" FontSize="9" FontWeight="Bold"
-                                 VerticalAlignment="Center" />
-                    </StackPanel>
-                  </Border>
-                  <ItemsControl ItemsSource="{Binding Deleted}">
-                    <ItemsControl.ItemTemplate>
-                      <DataTemplate>
-                        <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}"
-                                  Content="{Binding Path}" />
-                      </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                  </ItemsControl>
-                </StackPanel>
-
-                <StackPanel IsVisible="{Binding Untracked.Count}">
-                  <Border Classes="statusBadge" Background="{DynamicResource HyperionInfoBrush}"
-                          HorizontalAlignment="Left">
-                    <StackPanel Orientation="Horizontal" Spacing="3">
-                      <mi:MaterialIcon Kind="FileQuestionOutline" Width="10" Height="10" Foreground="Black" />
-                      <TextBlock Text="UNTRACKED" Foreground="Black" FontSize="9" FontWeight="Bold"
-                                 VerticalAlignment="Center" />
-                    </StackPanel>
-                  </Border>
-                  <ItemsControl ItemsSource="{Binding Untracked}">
-                    <ItemsControl.ItemTemplate>
-                      <DataTemplate>
-                        <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}"
-                                  Content="{Binding Path}" />
-                      </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                  </ItemsControl>
-                </StackPanel>
-
-              </StackPanel>
-            </ScrollViewer>
-          </Grid>
-        </Border>
-
-        <!-- Center: commit list -->
-        <Border Grid.Column="1" Classes="card" Padding="0,8,0,0">
-          <Grid RowDefinitions="Auto,*">
-            <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="4" Margin="10,0,10,6">
-              <mi:MaterialIcon Kind="SourceCommit" Width="12" Height="12"
-                               Foreground="{DynamicResource HyperionTextHigh}" />
-              <TextBlock Text="COMMITS" Classes="section" />
-            </StackPanel>
-            <ListBox Grid.Row="1"
-                     ItemsSource="{Binding Commits}"
-                     SelectedItem="{Binding SelectedCommit, Mode=TwoWay}"
-                     Background="Transparent"
-                     BorderThickness="0">
-              <ListBox.ItemTemplate>
-                <DataTemplate x:DataType="vm:CommitListItem">
-                  <Grid ColumnDefinitions="Auto,Auto,Auto,90,*"
-                        Height="30"
-                        VerticalAlignment="Stretch">
-                    <ctl:CommitGraphRowControl Grid.Column="0"
-                                               Row="{Binding GraphRow}"
-                                               LaneWidth="11"
-                                               DotRadius="3.5"
-                                               LineThickness="1.6"
-                                               DotEdgeColor="{DynamicResource HyperionDotEdge}"
-                                               MinWidth="22"
-                                               Margin="2,0,6,0"
-                                               VerticalAlignment="Stretch" />
-                    <Border Grid.Column="1"
-                            Width="22" Height="22"
-                            CornerRadius="11"
-                            ClipToBounds="True"
-                            Margin="0,0,8,0"
-                            VerticalAlignment="Center"
-                            Background="{DynamicResource HyperionSurfaceElevatedBrush}">
-                      <Image Source="{Binding Avatar}" Stretch="UniformToFill" />
-                    </Border>
-                    <StackPanel Grid.Column="2" Width="84" VerticalAlignment="Center" Margin="0,0,8,0">
-                      <TextBlock Text="{Binding Author}" FontSize="11"
-                                 Foreground="{DynamicResource HyperionTextHigh}"
-                                 TextTrimming="CharacterEllipsis" />
-                      <TextBlock Text="{Binding Date}" Classes="muted" FontSize="9" />
-                    </StackPanel>
-                    <TextBlock Grid.Column="3"
-                               Text="{Binding ShortSha}"
-                               FontFamily="Consolas"
-                               FontSize="11"
-                               Foreground="{DynamicResource HyperionTertiaryBrush}"
-                               VerticalAlignment="Center" />
-                    <TextBlock Grid.Column="4"
-                               Text="{Binding Summary}"
-                               TextTrimming="CharacterEllipsis"
-                               VerticalAlignment="Center"
-                               Margin="6,0,10,0"
-                               FontSize="11"
-                               Foreground="{DynamicResource HyperionTextHigh}" />
-                  </Grid>
-                </DataTemplate>
-              </ListBox.ItemTemplate>
-              <ListBox.Styles>
-                <Style Selector="ListBoxItem">
-                  <Setter Property="Padding" Value="6,1" />
-                  <Setter Property="MinHeight" Value="30" />
-                </Style>
-              </ListBox.Styles>
-            </ListBox>
-          </Grid>
-        </Border>
-
-        <!-- Right: details -->
-        <Border Grid.Column="2" Classes="card">
-          <Grid RowDefinitions="Auto,*">
-            <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="4" Margin="0,0,0,6">
-              <mi:MaterialIcon Kind="InformationOutline" Width="12" Height="12"
-                               Foreground="{DynamicResource HyperionTextHigh}" />
-              <TextBlock Text="COMMIT DETAILS" Classes="section" />
-            </StackPanel>
-            <ScrollViewer Grid.Row="1">
-              <ContentControl Content="{Binding SelectedCommit}">
-                <ContentControl.DataTemplates>
-                  <DataTemplate DataType="vm:CommitListItem">
-                    <StackPanel Spacing="6">
-                      <StackPanel Orientation="Horizontal" Spacing="8">
-                        <Border Width="36" Height="36"
-                                CornerRadius="18"
-                                ClipToBounds="True"
-                                Background="{DynamicResource HyperionSurfaceElevatedBrush}">
-                          <Image Source="{Binding Avatar}" Stretch="UniformToFill" />
-                        </Border>
-                        <StackPanel VerticalAlignment="Center">
-                          <TextBlock Text="{Binding Author}" FontSize="13" FontWeight="SemiBold" />
-                          <StackPanel Orientation="Horizontal" Spacing="3">
-                            <mi:MaterialIcon Kind="EmailOutline" Width="10" Height="10"
-                                             Foreground="{DynamicResource HyperionTextMedium}" />
-                            <TextBlock Text="{Binding Email}" Classes="muted" FontSize="10"
-                                       VerticalAlignment="Center" />
-                          </StackPanel>
-                        </StackPanel>
-                      </StackPanel>
-
-                      <StackPanel Spacing="2">
-                        <StackPanel Orientation="Horizontal" Spacing="3">
-                          <mi:MaterialIcon Kind="Pound" Width="10" Height="10"
-                                           Foreground="{DynamicResource HyperionTextMedium}" />
-                          <TextBlock Classes="muted" FontSize="9" Text="SHA" VerticalAlignment="Center" />
-                        </StackPanel>
-                        <TextBlock Text="{Binding Sha}" FontFamily="Consolas" FontSize="10" TextWrapping="Wrap" />
-                      </StackPanel>
-
-                      <StackPanel Spacing="2">
-                        <StackPanel Orientation="Horizontal" Spacing="3">
-                          <mi:MaterialIcon Kind="ClockOutline" Width="10" Height="10"
-                                           Foreground="{DynamicResource HyperionTextMedium}" />
-                          <TextBlock Classes="muted" FontSize="9" Text="DATE" VerticalAlignment="Center" />
-                        </StackPanel>
-                        <TextBlock Text="{Binding Date}" FontSize="11" />
-                      </StackPanel>
-
-                      <StackPanel Spacing="2">
-                        <StackPanel Orientation="Horizontal" Spacing="3">
-                          <mi:MaterialIcon Kind="ArrowUp" Width="10" Height="10"
-                                           Foreground="{DynamicResource HyperionTextMedium}" />
-                          <TextBlock Classes="muted" FontSize="9" Text="PARENTS" VerticalAlignment="Center" />
-                        </StackPanel>
-                        <TextBlock Text="{Binding ParentsText}" FontFamily="Consolas" FontSize="10" TextWrapping="Wrap" />
-                      </StackPanel>
-
-                      <Separator Background="{DynamicResource HyperionBorderBrush}" Height="1" />
-
-                      <StackPanel Spacing="2">
-                        <StackPanel Orientation="Horizontal" Spacing="3">
-                          <mi:MaterialIcon Kind="MessageOutline" Width="10" Height="10"
-                                           Foreground="{DynamicResource HyperionTextMedium}" />
-                          <TextBlock Classes="muted" FontSize="9" Text="MESSAGE" VerticalAlignment="Center" />
-                        </StackPanel>
-                        <TextBlock Text="{Binding Message}" FontSize="11" TextWrapping="Wrap" />
-                      </StackPanel>
-                    </StackPanel>
-                  </DataTemplate>
-                </ContentControl.DataTemplates>
-              </ContentControl>
-            </ScrollViewer>
-          </Grid>
-        </Border>
-      </Grid>
-
-      <!-- Commit row -->
-      <Border Grid.Row="2" Classes="card">
-        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-          <TextBox Grid.Column="0"
-                   Text="{Binding CommitMessage, Mode=TwoWay}"
-                   Watermark="Commit message  (short summary, then optional body)" />
-          <Button Grid.Column="1"
-                  Command="{Binding CommitCommand}"
-                  Classes="Flat action"
-                  VerticalAlignment="Bottom">
-            <StackPanel Orientation="Horizontal" Spacing="4">
-              <mi:MaterialIcon Kind="Check" Width="14" Height="14" />
-              <TextBlock Text="COMMIT" VerticalAlignment="Center" />
-            </StackPanel>
+          <Button Grid.Column="4" Classes="chromeBtn close" Click="OnWindowClose" ToolTip.Tip="Close">
+            <mi:MaterialIcon Kind="WindowClose" Width="14" Height="14" />
           </Button>
         </Grid>
       </Border>
-    </Grid>
-  </DockPanel>
+
+      <!-- ====== Menu bar ====== -->
+      <Menu DockPanel.Dock="Top" Background="{DynamicResource Glass.SurfaceFill}">
+        <MenuItem Header="_File">
+          <MenuItem Header="_Open repo…" Click="Open_Click">
+            <MenuItem.Icon><mi:MaterialIcon Kind="FolderOpenOutline" Width="16" Height="16" /></MenuItem.Icon>
+          </MenuItem>
+          <MenuItem Header="_Clone…" Click="Clone_Click">
+            <MenuItem.Icon><mi:MaterialIcon Kind="CloudDownloadOutline" Width="16" Height="16" /></MenuItem.Icon>
+          </MenuItem>
+          <MenuItem Header="_Init new repo…" Click="Init_Click">
+            <MenuItem.Icon><mi:MaterialIcon Kind="FolderPlusOutline" Width="16" Height="16" /></MenuItem.Icon>
+          </MenuItem>
+          <Separator />
+          <MenuItem Header="E_xit" Click="Exit_Click">
+            <MenuItem.Icon><mi:MaterialIcon Kind="ExitToApp" Width="16" Height="16" /></MenuItem.Icon>
+          </MenuItem>
+        </MenuItem>
+
+        <!-- ====== Repo-dependent menus (gated on HasRepository) ====== -->
+        <MenuItem Header="_Repo" IsEnabled="{Binding HasRepository}">
+          <MenuItem Header="_Refresh" Command="{Binding RefreshCommand}">
+            <MenuItem.Icon><mi:MaterialIcon Kind="Refresh" Width="16" Height="16" /></MenuItem.Icon>
+          </MenuItem>
+          <Separator />
+          <MenuItem Header="_Fetch…" Click="Fetch_Click">
+            <MenuItem.Icon><mi:MaterialIcon Kind="CloudDownloadOutline" Width="16" Height="16" /></MenuItem.Icon>
+          </MenuItem>
+          <MenuItem Header="_Pull…" Click="Pull_Click">
+            <MenuItem.Icon>
+              <Image Source="avares://TechTeaStudio.GitClient.App/Assets/Icons/pull.png" Width="16" Height="16" />
+            </MenuItem.Icon>
+          </MenuItem>
+          <MenuItem Header="P_ush…" Click="Push_Click">
+            <MenuItem.Icon>
+              <Image Source="avares://TechTeaStudio.GitClient.App/Assets/Icons/deployment.png" Width="16" Height="16" />
+            </MenuItem.Icon>
+          </MenuItem>
+          <Separator />
+          <MenuItem Header="_Add remote…" Click="AddRemote_Click" />
+          <MenuItem Header="Re_name remote…" Click="RenameRemote_Click" />
+          <MenuItem Header="_Submodule add…" Click="SubmoduleAdd_Click" />
+          <MenuItem Header="Su_bmodule update…" Click="SubmoduleUpdate_Click" />
+          <Separator />
+          <MenuItem Header="A_pply patch…" Click="ApplyPatch_Click" />
+          <MenuItem Header="Refl_og (HEAD)…" Click="Reflog_Click" />
+          <MenuItem Header="_Contributors…" Click="Contributors_Click" />
+        </MenuItem>
+
+        <MenuItem Header="_Branch" IsEnabled="{Binding HasRepository}">
+          <MenuItem Header="_Create branch…" Click="CreateBranch_Click">
+            <MenuItem.Icon>
+              <Image Source="avares://TechTeaStudio.GitClient.App/Assets/Icons/branch.png" Width="16" Height="16" />
+            </MenuItem.Icon>
+          </MenuItem>
+          <MenuItem Header="_Rename branch…" Click="RenameBranch_Click" />
+          <MenuItem Header="_Delete branch…" Click="DeleteBranch_Click">
+            <MenuItem.Icon>
+              <Image Source="avares://TechTeaStudio.GitClient.App/Assets/Icons/delete.png" Width="16" Height="16" />
+            </MenuItem.Icon>
+          </MenuItem>
+          <MenuItem Header="Check_out selected branch" Click="CheckoutBranch_Click">
+            <MenuItem.Icon><mi:MaterialIcon Kind="SourceBranchCheck" Width="16" Height="16" /></MenuItem.Icon>
+          </MenuItem>
+        </MenuItem>
+
+        <MenuItem Header="_Tag" IsEnabled="{Binding HasRepository}">
+          <MenuItem Header="_Create tag at selected commit…" Click="CreateTag_Click">
+            <MenuItem.Icon><mi:MaterialIcon Kind="Tag" Width="16" Height="16" /></MenuItem.Icon>
+          </MenuItem>
+          <MenuItem Header="_List tags…" Click="ListTags_Click" />
+        </MenuItem>
+
+        <MenuItem Header="_Commit" IsEnabled="{Binding HasRepository}">
+          <MenuItem Header="_Amend HEAD…" Click="Amend_Click">
+            <MenuItem.Icon><mi:MaterialIcon Kind="PencilOutline" Width="16" Height="16" /></MenuItem.Icon>
+          </MenuItem>
+          <MenuItem Header="_Stash…" Click="Stash_Click">
+            <MenuItem.Icon><mi:MaterialIcon Kind="Archive" Width="16" Height="16" /></MenuItem.Icon>
+          </MenuItem>
+          <MenuItem Header="_Apply stash 0" Click="StashApply_Click" />
+          <MenuItem Header="_Pop stash 0" Click="StashPop_Click" />
+          <MenuItem Header="_Note on selected commit…" Click="AddNote_Click" />
+          <MenuItem Header="C_lean untracked…" Click="Clean_Click">
+            <MenuItem.Icon><mi:MaterialIcon Kind="Broom" Width="16" Height="16" /></MenuItem.Icon>
+          </MenuItem>
+          <MenuItem Header="C_onflicts…" Click="Conflicts_Click">
+            <MenuItem.Icon><mi:MaterialIcon Kind="AlertOctagonOutline" Width="16" Height="16" /></MenuItem.Icon>
+          </MenuItem>
+        </MenuItem>
+
+        <MenuItem Header="Re_write" IsEnabled="{Binding HasRepository}">
+          <MenuItem Header="_Merge into current…" Click="Merge_Click">
+            <MenuItem.Icon>
+              <Image Source="avares://TechTeaStudio.GitClient.App/Assets/Icons/merge.png" Width="16" Height="16" />
+            </MenuItem.Icon>
+          </MenuItem>
+          <MenuItem Header="_Rebase onto…" Click="Rebase_Click">
+            <MenuItem.Icon><mi:MaterialIcon Kind="SourceCommitNextLocal" Width="16" Height="16" /></MenuItem.Icon>
+          </MenuItem>
+          <MenuItem Header="Re_vert selected commit…" Click="Revert_Click">
+            <MenuItem.Icon><mi:MaterialIcon Kind="Undo" Width="16" Height="16" /></MenuItem.Icon>
+          </MenuItem>
+          <MenuItem Header="_Cherry-pick selected…" Click="CherryPick_Click">
+            <MenuItem.Icon><mi:MaterialIcon Kind="FruitCherries" Width="16" Height="16" /></MenuItem.Icon>
+          </MenuItem>
+          <MenuItem Header="Re_set to selected…" Click="Reset_Click">
+            <MenuItem.Icon><mi:MaterialIcon Kind="Restore" Width="16" Height="16" /></MenuItem.Icon>
+          </MenuItem>
+        </MenuItem>
+
+        <MenuItem Header="_Inspect" IsEnabled="{Binding HasRepository}">
+          <MenuItem Header="_Diff selected vs parent" Click="Diff_Click">
+            <MenuItem.Icon>
+              <Image Source="avares://TechTeaStudio.GitClient.App/Assets/Icons/compare.png" Width="16" Height="16" />
+            </MenuItem.Icon>
+          </MenuItem>
+          <MenuItem Header="_Tree at selected commit" Click="Tree_Click">
+            <MenuItem.Icon><mi:MaterialIcon Kind="FileTree" Width="16" Height="16" /></MenuItem.Icon>
+          </MenuItem>
+          <MenuItem Header="_Blame file at selected…" Click="Blame_Click">
+            <MenuItem.Icon><mi:MaterialIcon Kind="AccountSearchOutline" Width="16" Height="16" /></MenuItem.Icon>
+          </MenuItem>
+        </MenuItem>
+      </Menu>
+
+      <!-- ====== App bar (title + subtitle + busy + theme toggle) ====== -->
+      <Border DockPanel.Dock="Top" Classes="appbar">
+        <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="10">
+          <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+            <Image Source="avares://TechTeaStudio.GitClient.App/Assets/Icons/branches.png"
+                   Width="20" Height="20" />
+            <TextBlock Text="{Binding Greeting}"
+                       FontSize="14" FontWeight="SemiBold"
+                       Foreground="{DynamicResource HyperionTextHigh}"
+                       VerticalAlignment="Center" />
+          </StackPanel>
+
+          <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center"
+                      IsVisible="{Binding Path, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+            <mi:MaterialIcon Kind="FolderOutline" Width="12" Height="12"
+                             Foreground="{DynamicResource HyperionTextMedium}" />
+            <TextBlock Text="{Binding Path}"
+                       Foreground="{DynamicResource HyperionTextMedium}"
+                       FontSize="11"
+                       TextTrimming="CharacterEllipsis"
+                       MaxWidth="560"
+                       ToolTip.Tip="{Binding Path}"
+                       VerticalAlignment="Center" />
+          </StackPanel>
+
+          <Border Grid.Column="2" />
+
+          <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+            <ProgressBar IsIndeterminate="True" Width="80" Height="3"
+                         IsVisible="{Binding IsBusy}"
+                         Foreground="{DynamicResource HyperionTertiaryBrush}" />
+            <Button Classes="icon Flat"
+                    ToolTip.Tip="Toggle dark / light theme"
+                    Click="ThemeToggle_Click">
+              <mi:MaterialIcon x:Name="ThemeToggleIcon"
+                               Kind="WeatherSunny"
+                               Width="18" Height="18" />
+            </Button>
+          </StackPanel>
+        </Grid>
+      </Border>
+
+      <!-- ====== Status bar ====== -->
+      <Border DockPanel.Dock="Bottom"
+              Background="{DynamicResource Glass.SurfaceFill}"
+              BorderBrush="{DynamicResource Glass.Divider}"
+              BorderThickness="0,1,0,0"
+              Padding="12,4">
+        <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+          <mi:MaterialIcon Kind="InformationOutline" Width="12" Height="12"
+                           Foreground="{DynamicResource HyperionTextMedium}" />
+          <TextBlock Text="{Binding StatusMessage}"
+                     Foreground="{DynamicResource HyperionTextMedium}"
+                     FontSize="11"
+                     VerticalAlignment="Center" />
+        </StackPanel>
+      </Border>
+
+      <!-- ====== Main content area (gated on HasRepository) ====== -->
+      <Grid>
+
+        <!-- Empty-state overlay shown when no repo is open. While IsBusy is true
+             (Open / Clone / Init in flight), the buttons hide and a big
+             spinner + status message replace them. -->
+        <Border IsVisible="{Binding !HasRepository}"
+                Background="Transparent"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch">
+          <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="14">
+            <Image Source="avares://TechTeaStudio.GitClient.App/Assets/Icons/branches.png"
+                   Width="96" Height="96" Opacity="0.55"
+                   IsVisible="{Binding !IsBusy}" />
+
+            <!-- Big spinner shown while opening / cloning / initialising. -->
+            <mi:MaterialIcon Kind="Loading"
+                             Classes="spinner"
+                             Width="64" Height="64"
+                             Foreground="{DynamicResource HyperionPrimaryBrush}"
+                             IsVisible="{Binding IsBusy}">
+              <mi:MaterialIcon.RenderTransform>
+                <RotateTransform />
+              </mi:MaterialIcon.RenderTransform>
+            </mi:MaterialIcon>
+
+            <TextBlock Text="No repository open"
+                       FontSize="18" FontWeight="SemiBold"
+                       Foreground="{DynamicResource HyperionTextHigh}"
+                       HorizontalAlignment="Center"
+                       IsVisible="{Binding !IsBusy}" />
+            <TextBlock Text="Opening repository…"
+                       FontSize="18" FontWeight="SemiBold"
+                       Foreground="{DynamicResource HyperionTextHigh}"
+                       HorizontalAlignment="Center"
+                       IsVisible="{Binding IsBusy}" />
+
+            <TextBlock Text="Open an existing repository, clone from a URL, or initialise a new one to get started."
+                       Foreground="{DynamicResource HyperionTextMedium}"
+                       FontSize="12"
+                       TextWrapping="Wrap"
+                       MaxWidth="420"
+                       TextAlignment="Center"
+                       IsVisible="{Binding !IsBusy}" />
+
+            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center" Margin="0,8,0,0"
+                        IsVisible="{Binding !IsBusy}">
+              <Button Classes="Flat action" Click="Open_Click">
+                <StackPanel Orientation="Horizontal" Spacing="4">
+                  <mi:MaterialIcon Kind="FolderOpenOutline" Width="14" Height="14" />
+                  <TextBlock Text="OPEN" VerticalAlignment="Center" />
+                </StackPanel>
+              </Button>
+              <Button Classes="Flat action" Click="Clone_Click">
+                <StackPanel Orientation="Horizontal" Spacing="4">
+                  <mi:MaterialIcon Kind="CloudDownloadOutline" Width="14" Height="14" />
+                  <TextBlock Text="CLONE" VerticalAlignment="Center" />
+                </StackPanel>
+              </Button>
+              <Button Classes="Outline action" Click="Init_Click">
+                <StackPanel Orientation="Horizontal" Spacing="4">
+                  <mi:MaterialIcon Kind="FolderPlusOutline" Width="14" Height="14" />
+                  <TextBlock Text="INIT" VerticalAlignment="Center" />
+                </StackPanel>
+              </Button>
+            </StackPanel>
+          </StackPanel>
+        </Border>
+
+        <!-- Repo workspace — visible only when a repo is open. -->
+        <Grid Margin="10" RowDefinitions="Auto,*,Auto" RowSpacing="8"
+              IsVisible="{Binding HasRepository}">
+
+          <!-- Action toolbar -->
+          <Border Grid.Row="0" Classes="card">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+              <Button Classes="Flat action" Click="Open_Click"
+                      ToolTip.Tip="Open existing repository (folder picker)">
+                <StackPanel Orientation="Horizontal" Spacing="4">
+                  <mi:MaterialIcon Kind="FolderOpenOutline" Width="14" Height="14" />
+                  <TextBlock Text="OPEN" VerticalAlignment="Center" />
+                </StackPanel>
+              </Button>
+
+              <Button Classes="Flat action" Click="Clone_Click"
+                      ToolTip.Tip="Clone from URL into a folder…">
+                <StackPanel Orientation="Horizontal" Spacing="4">
+                  <mi:MaterialIcon Kind="CloudDownloadOutline" Width="14" Height="14" />
+                  <TextBlock Text="CLONE" VerticalAlignment="Center" />
+                </StackPanel>
+              </Button>
+
+              <Button Command="{Binding RefreshCommand}"
+                      Classes="Outline action"
+                      ToolTip.Tip="Reload branches / commits / status">
+                <StackPanel Orientation="Horizontal" Spacing="4">
+                  <mi:MaterialIcon Kind="Refresh" Width="14" Height="14" />
+                  <TextBlock Text="REFRESH" VerticalAlignment="Center" />
+                </StackPanel>
+              </Button>
+            </StackPanel>
+          </Border>
+
+          <!-- Main 3-column area -->
+          <Grid Grid.Row="1" ColumnDefinitions="200,2*,1.4*" ColumnSpacing="8">
+
+            <!-- Left: branches + working tree -->
+            <Border Grid.Column="0" Classes="card">
+              <Grid RowDefinitions="Auto,Auto,Auto,*" RowSpacing="6">
+                <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="4">
+                  <Image Source="avares://TechTeaStudio.GitClient.App/Assets/Icons/branches.png"
+                         Width="14" Height="14" />
+                  <TextBlock Text="BRANCH" Classes="section" />
+                  <mi:MaterialIcon Kind="Loading"
+                                   Classes="spinner"
+                                   Width="12" Height="12"
+                                   Foreground="{DynamicResource HyperionTertiaryBrush}"
+                                   IsVisible="{Binding IsBusy}"
+                                   ToolTip.Tip="Loading branches…">
+                    <mi:MaterialIcon.RenderTransform>
+                      <RotateTransform />
+                    </mi:MaterialIcon.RenderTransform>
+                  </mi:MaterialIcon>
+                </StackPanel>
+                <ComboBox Grid.Row="1"
+                          ItemsSource="{Binding Branches}"
+                          SelectedItem="{Binding SelectedBranch, Mode=TwoWay}"
+                          HorizontalAlignment="Stretch">
+                  <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                      <StackPanel Orientation="Horizontal" Spacing="6">
+                        <mi:MaterialIcon Kind="SourceBranch" Width="12" Height="12"
+                                         Foreground="{DynamicResource HyperionTertiaryBrush}" />
+                        <TextBlock Text="{Binding Name}" VerticalAlignment="Center" FontSize="11" />
+                      </StackPanel>
+                    </DataTemplate>
+                  </ComboBox.ItemTemplate>
+                </ComboBox>
+
+                <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="4" Margin="0,6,0,0">
+                  <mi:MaterialIcon Kind="FileTree" Width="12" Height="12"
+                                   Foreground="{DynamicResource HyperionTextHigh}" />
+                  <TextBlock Text="WORKING TREE" Classes="section" />
+                </StackPanel>
+
+                <ScrollViewer Grid.Row="3">
+                  <StackPanel Spacing="8">
+
+                    <StackPanel IsVisible="{Binding Modified.Count}">
+                      <Border Classes="statusBadge" Background="{DynamicResource HyperionWarningBrush}"
+                              HorizontalAlignment="Left">
+                        <StackPanel Orientation="Horizontal" Spacing="3">
+                          <mi:MaterialIcon Kind="PencilOutline" Width="10" Height="10" Foreground="Black" />
+                          <TextBlock Text="MODIFIED" Foreground="Black" FontSize="9" FontWeight="Bold"
+                                     VerticalAlignment="Center" />
+                        </StackPanel>
+                      </Border>
+                      <ItemsControl ItemsSource="{Binding Modified}">
+                        <ItemsControl.ItemTemplate>
+                          <DataTemplate>
+                            <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                      Content="{Binding Path}" />
+                          </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                      </ItemsControl>
+                    </StackPanel>
+
+                    <StackPanel IsVisible="{Binding Added.Count}">
+                      <Border Classes="statusBadge" Background="{DynamicResource HyperionSuccessBrush}"
+                              HorizontalAlignment="Left">
+                        <StackPanel Orientation="Horizontal" Spacing="3">
+                          <mi:MaterialIcon Kind="PlusCircleOutline" Width="10" Height="10" Foreground="Black" />
+                          <TextBlock Text="ADDED" Foreground="Black" FontSize="9" FontWeight="Bold"
+                                     VerticalAlignment="Center" />
+                        </StackPanel>
+                      </Border>
+                      <ItemsControl ItemsSource="{Binding Added}">
+                        <ItemsControl.ItemTemplate>
+                          <DataTemplate>
+                            <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                      Content="{Binding Path}" />
+                          </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                      </ItemsControl>
+                    </StackPanel>
+
+                    <StackPanel IsVisible="{Binding Deleted.Count}">
+                      <Border Classes="statusBadge" Background="{DynamicResource HyperionDangerBrush}"
+                              HorizontalAlignment="Left">
+                        <StackPanel Orientation="Horizontal" Spacing="3">
+                          <mi:MaterialIcon Kind="MinusCircleOutline" Width="10" Height="10" Foreground="White" />
+                          <TextBlock Text="DELETED" Foreground="White" FontSize="9" FontWeight="Bold"
+                                     VerticalAlignment="Center" />
+                        </StackPanel>
+                      </Border>
+                      <ItemsControl ItemsSource="{Binding Deleted}">
+                        <ItemsControl.ItemTemplate>
+                          <DataTemplate>
+                            <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                      Content="{Binding Path}" />
+                          </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                      </ItemsControl>
+                    </StackPanel>
+
+                    <StackPanel IsVisible="{Binding Untracked.Count}">
+                      <Border Classes="statusBadge" Background="{DynamicResource HyperionInfoBrush}"
+                              HorizontalAlignment="Left">
+                        <StackPanel Orientation="Horizontal" Spacing="3">
+                          <mi:MaterialIcon Kind="FileQuestionOutline" Width="10" Height="10" Foreground="Black" />
+                          <TextBlock Text="UNTRACKED" Foreground="Black" FontSize="9" FontWeight="Bold"
+                                     VerticalAlignment="Center" />
+                        </StackPanel>
+                      </Border>
+                      <ItemsControl ItemsSource="{Binding Untracked}">
+                        <ItemsControl.ItemTemplate>
+                          <DataTemplate>
+                            <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                      Content="{Binding Path}" />
+                          </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                      </ItemsControl>
+                    </StackPanel>
+
+                  </StackPanel>
+                </ScrollViewer>
+              </Grid>
+            </Border>
+
+            <!-- Center: commit list -->
+            <Border Grid.Column="1" Classes="card" Padding="0,8,0,0">
+              <Grid RowDefinitions="Auto,*">
+                <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="4" Margin="10,0,10,6">
+                  <mi:MaterialIcon Kind="SourceCommit" Width="12" Height="12"
+                                   Foreground="{DynamicResource HyperionTextHigh}" />
+                  <TextBlock Text="COMMITS" Classes="section" />
+                  <mi:MaterialIcon Kind="Loading"
+                                   Classes="spinner"
+                                   Width="12" Height="12"
+                                   Foreground="{DynamicResource HyperionTertiaryBrush}"
+                                   IsVisible="{Binding IsBusy}"
+                                   ToolTip.Tip="Loading history…">
+                    <mi:MaterialIcon.RenderTransform>
+                      <RotateTransform />
+                    </mi:MaterialIcon.RenderTransform>
+                  </mi:MaterialIcon>
+                </StackPanel>
+                <ListBox Grid.Row="1"
+                         ItemsSource="{Binding Commits}"
+                         SelectedItem="{Binding SelectedCommit, Mode=TwoWay}"
+                         Background="Transparent"
+                         BorderThickness="0">
+                  <ListBox.ItemTemplate>
+                    <DataTemplate x:DataType="vm:CommitListItem">
+                      <Grid ColumnDefinitions="Auto,Auto,Auto,90,*"
+                            Height="30"
+                            VerticalAlignment="Stretch">
+                        <ctl:CommitGraphRowControl Grid.Column="0"
+                                                   Row="{Binding GraphRow}"
+                                                   LaneWidth="11"
+                                                   DotRadius="3.5"
+                                                   LineThickness="1.6"
+                                                   DotEdgeColor="{DynamicResource HyperionDotEdge}"
+                                                   MinWidth="22"
+                                                   Margin="2,0,6,0"
+                                                   VerticalAlignment="Stretch" />
+                        <Border Grid.Column="1"
+                                Width="22" Height="22"
+                                CornerRadius="11"
+                                ClipToBounds="True"
+                                Margin="0,0,8,0"
+                                VerticalAlignment="Center"
+                                Background="{DynamicResource HyperionSurfaceElevatedBrush}">
+                          <Image Source="{Binding Avatar}" Stretch="UniformToFill" />
+                        </Border>
+                        <StackPanel Grid.Column="2" Width="84" VerticalAlignment="Center" Margin="0,0,8,0">
+                          <TextBlock Text="{Binding Author}" FontSize="11"
+                                     Foreground="{DynamicResource HyperionTextHigh}"
+                                     TextTrimming="CharacterEllipsis" />
+                          <TextBlock Text="{Binding Date}" Classes="muted" FontSize="9" />
+                        </StackPanel>
+                        <TextBlock Grid.Column="3"
+                                   Text="{Binding ShortSha}"
+                                   FontFamily="Consolas"
+                                   FontSize="11"
+                                   Foreground="{DynamicResource HyperionTertiaryBrush}"
+                                   VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="4"
+                                   Text="{Binding Summary}"
+                                   TextTrimming="CharacterEllipsis"
+                                   VerticalAlignment="Center"
+                                   Margin="6,0,10,0"
+                                   FontSize="11"
+                                   Foreground="{DynamicResource HyperionTextHigh}" />
+                      </Grid>
+                    </DataTemplate>
+                  </ListBox.ItemTemplate>
+                  <ListBox.Styles>
+                    <Style Selector="ListBoxItem">
+                      <Setter Property="Padding" Value="6,1" />
+                      <Setter Property="MinHeight" Value="30" />
+                    </Style>
+                  </ListBox.Styles>
+                </ListBox>
+              </Grid>
+            </Border>
+
+            <!-- Right: details -->
+            <Border Grid.Column="2" Classes="card">
+              <Grid RowDefinitions="Auto,*">
+                <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="4" Margin="0,0,0,6">
+                  <mi:MaterialIcon Kind="InformationOutline" Width="12" Height="12"
+                                   Foreground="{DynamicResource HyperionTextHigh}" />
+                  <TextBlock Text="COMMIT DETAILS" Classes="section" />
+                </StackPanel>
+                <ScrollViewer Grid.Row="1">
+                  <ContentControl Content="{Binding SelectedCommit}">
+                    <ContentControl.DataTemplates>
+                      <DataTemplate DataType="vm:CommitListItem">
+                        <StackPanel Spacing="6">
+                          <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Border Width="36" Height="36"
+                                    CornerRadius="18"
+                                    ClipToBounds="True"
+                                    Background="{DynamicResource HyperionSurfaceElevatedBrush}">
+                              <Image Source="{Binding Avatar}" Stretch="UniformToFill" />
+                            </Border>
+                            <StackPanel VerticalAlignment="Center">
+                              <TextBlock Text="{Binding Author}" FontSize="13" FontWeight="SemiBold" />
+                              <StackPanel Orientation="Horizontal" Spacing="3">
+                                <mi:MaterialIcon Kind="EmailOutline" Width="10" Height="10"
+                                                 Foreground="{DynamicResource HyperionTextMedium}" />
+                                <TextBlock Text="{Binding Email}" Classes="muted" FontSize="10"
+                                           VerticalAlignment="Center" />
+                              </StackPanel>
+                            </StackPanel>
+                          </StackPanel>
+
+                          <StackPanel Spacing="2">
+                            <StackPanel Orientation="Horizontal" Spacing="3">
+                              <mi:MaterialIcon Kind="Pound" Width="10" Height="10"
+                                               Foreground="{DynamicResource HyperionTextMedium}" />
+                              <TextBlock Classes="muted" FontSize="9" Text="SHA" VerticalAlignment="Center" />
+                            </StackPanel>
+                            <TextBlock Text="{Binding Sha}" FontFamily="Consolas" FontSize="10" TextWrapping="Wrap" />
+                          </StackPanel>
+
+                          <StackPanel Spacing="2">
+                            <StackPanel Orientation="Horizontal" Spacing="3">
+                              <mi:MaterialIcon Kind="ClockOutline" Width="10" Height="10"
+                                               Foreground="{DynamicResource HyperionTextMedium}" />
+                              <TextBlock Classes="muted" FontSize="9" Text="DATE" VerticalAlignment="Center" />
+                            </StackPanel>
+                            <TextBlock Text="{Binding Date}" FontSize="11" />
+                          </StackPanel>
+
+                          <StackPanel Spacing="2">
+                            <StackPanel Orientation="Horizontal" Spacing="3">
+                              <mi:MaterialIcon Kind="ArrowUp" Width="10" Height="10"
+                                               Foreground="{DynamicResource HyperionTextMedium}" />
+                              <TextBlock Classes="muted" FontSize="9" Text="PARENTS" VerticalAlignment="Center" />
+                            </StackPanel>
+                            <TextBlock Text="{Binding ParentsText}" FontFamily="Consolas" FontSize="10" TextWrapping="Wrap" />
+                          </StackPanel>
+
+                          <Separator Background="{DynamicResource Glass.Divider}" Height="1" />
+
+                          <StackPanel Spacing="2">
+                            <StackPanel Orientation="Horizontal" Spacing="3">
+                              <mi:MaterialIcon Kind="MessageOutline" Width="10" Height="10"
+                                               Foreground="{DynamicResource HyperionTextMedium}" />
+                              <TextBlock Classes="muted" FontSize="9" Text="MESSAGE" VerticalAlignment="Center" />
+                            </StackPanel>
+                            <TextBlock Text="{Binding Message}" FontSize="11" TextWrapping="Wrap" />
+                          </StackPanel>
+                        </StackPanel>
+                      </DataTemplate>
+                    </ContentControl.DataTemplates>
+                  </ContentControl>
+                </ScrollViewer>
+              </Grid>
+            </Border>
+          </Grid>
+
+          <!-- Commit row -->
+          <Border Grid.Row="2" Classes="card">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+              <TextBox Grid.Column="0"
+                       Text="{Binding CommitMessage, Mode=TwoWay}"
+                       Watermark="Commit message  (short summary, then optional body)" />
+              <Button Grid.Column="1"
+                      Command="{Binding CommitCommand}"
+                      Classes="Flat action"
+                      VerticalAlignment="Bottom">
+                <StackPanel Orientation="Horizontal" Spacing="4">
+                  <Image Source="avares://TechTeaStudio.GitClient.App/Assets/Icons/commit-git.png"
+                         Width="14" Height="14" />
+                  <TextBlock Text="COMMIT" VerticalAlignment="Center" />
+                </StackPanel>
+              </Button>
+            </Grid>
+          </Border>
+
+        </Grid>
+      </Grid>
+    </DockPanel>
+  </Panel>
 </Window>

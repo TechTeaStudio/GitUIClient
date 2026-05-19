@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using Avalonia.Styling;
@@ -599,4 +600,35 @@ public sealed partial class MainWindow : Window
                 : MaterialIconKind.WeatherNight;
         }
     }
+
+    // ────── Custom window chrome (SystemDecorations=None) ──────
+    //
+    // The title-bar Border in MainWindow.axaml routes its PointerPressed event
+    // here. Left-click anywhere on the strip begins a window-move drag; a
+    // double-click toggles maximize/restore (Windows convention). Other mouse
+    // buttons pass through so the standard right-click menu still works on
+    // controls inside the strip.
+
+    private void OnTitleBarPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (!e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
+            return;
+        if (e.ClickCount >= 2)
+        {
+            ToggleMaximize();
+            return;
+        }
+        BeginMoveDrag(e);
+    }
+
+    private void OnWindowMinimize(object? sender, RoutedEventArgs e)
+        => WindowState = WindowState.Minimized;
+
+    private void OnWindowMaximizeRestore(object? sender, RoutedEventArgs e)
+        => ToggleMaximize();
+
+    private void OnWindowClose(object? sender, RoutedEventArgs e) => Close();
+
+    private void ToggleMaximize()
+        => WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
 }

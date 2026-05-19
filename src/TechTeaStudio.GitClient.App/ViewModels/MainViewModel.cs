@@ -67,6 +67,15 @@ public sealed class MainViewModel : ObservableObject
 
     public string Greeting => "TechTeaStudio Git Client — v0.3.0";
 
+    /// <summary>
+    /// True when a repository is open (Open / Clone / Init succeeded and the
+    /// handle hasn't been disposed). UI bindings use this to gate every command
+    /// that requires an open repo — menu items, dialogs, commit row, etc.
+    /// Raise <see cref="ObservableObject.OnPropertyChanged"/> for this property
+    /// whenever the underlying handle changes.
+    /// </summary>
+    public bool HasRepository => _handle is not null;
+
     /// <summary>Author used for commits driven by the UI (amend, merge, revert, etc.).</summary>
     public AuthorInfo DefaultAuthor => new()
     {
@@ -142,6 +151,7 @@ public sealed class MainViewModel : ObservableObject
         {
             DisposeHandle();
             _handle = await _repos.OpenAsync(Path, ct).ConfigureAwait(false);
+            OnPropertyChanged(nameof(HasRepository));
             await RefreshInternalAsync(ct).ConfigureAwait(false);
             StatusMessage = $"Opened: {_handle.WorkingDirectory}";
         }).ConfigureAwait(false);
@@ -165,6 +175,7 @@ public sealed class MainViewModel : ObservableObject
         {
             DisposeHandle();
             _handle = await _repos.CloneAsync(url, destinationPath, progress: null, ct).ConfigureAwait(false);
+            OnPropertyChanged(nameof(HasRepository));
             await RefreshInternalAsync(ct).ConfigureAwait(false);
             StatusMessage = $"Cloned into: {_handle.WorkingDirectory}";
         }).ConfigureAwait(false);
@@ -317,6 +328,11 @@ public sealed class MainViewModel : ObservableObject
         IsBusy = true;
         try
         {
+            // Yield so the UI dispatcher renders the IsBusy=true state (spinners,
+            // disabled buttons) before we start work. Without this, LibGit2Sharp's
+            // synchronous methods (wrapped in Task.FromResult) finish before any
+            // repaint, and the user never sees the busy indicator.
+            await Task.Yield();
             await body().ConfigureAwait(false);
         }
         catch (OperationCanceledException)
@@ -345,6 +361,7 @@ public sealed class MainViewModel : ObservableObject
     {
         _handle?.Dispose();
         _handle = null;
+        OnPropertyChanged(nameof(HasRepository));
         Branches.Clear();
         Commits.Clear();
         Added.Clear();
