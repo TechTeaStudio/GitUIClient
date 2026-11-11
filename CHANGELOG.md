@@ -3,6 +3,15 @@
 All notable changes to this project are documented here.
 Format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.1] — 2026-11-11
+
+Platform move to .NET 11. No feature or behaviour change.
+
+### Changed
+- The app and the test project target `net11.0` (was `net10.0`).
+- `TechTeaStudio.GitClient.Core` gains a `net11.0` target next to `net8.0`, `net9.0` and `net10.0`.
+- CI installs the .NET 11 SDK. Building needs .NET SDK 11.
+
 ## [0.4.0] — 2026-05-19
 
 UI overhaul: chromeless custom title bar, liquid-glass acrylic backdrop, single-file palette, repo-aware gating, custom icon set, loading spinners.

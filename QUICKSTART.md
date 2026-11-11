@@ -3,7 +3,7 @@
 Avalonia 11 desktop git client + Core library wrapping `LibGit2Sharp` 0.31.0. Read-mostly v0.1.0: open / init / clone repos, list branches, show commits and diffs, see status, make commits. Push / pull / merge are explicitly deferred to v0.2+.
 
 ## Prerequisites
-- .NET SDK 10.0+
+- .NET SDK 11.0+
 - (No git CLI required — LibGit2Sharp ships its own native libraries.)
 
 ## Build

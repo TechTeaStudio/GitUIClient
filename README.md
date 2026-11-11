@@ -32,7 +32,7 @@ dotnet run --project src/TechTeaStudio.GitClient.App
 dotnet test  GitClient.slnx
 ```
 
-Requires .NET SDK 10. Core multi-targets `net8.0;net9.0;net10.0`. App is `net10.0` (`WinExe`). Tests run against temp-folder repos via `Repository.Init`; no network access required.
+Requires .NET SDK 11. Core multi-targets `net8.0;net9.0;net10.0;net11.0`. App is `net11.0` (`WinExe`). Tests run against temp-folder repos via `Repository.Init`; no network access required.
 
 ## Solution layout
 
