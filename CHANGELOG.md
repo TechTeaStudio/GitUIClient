@@ -3,6 +3,23 @@
 All notable changes to this project are documented here.
 Format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] — 2026-11-11
+
+Cherry-pick and revert report what happened as C# 15 unions, a parallel API on `net11.0`. What the app shows is unchanged.
+
+### Added
+- `CherryPickOutcome` (`Committed`, `Staged`, `Conflicted`) and `RevertOutcome` (`Committed`, `Staged`, `Conflicted`, `NothingToRevert`): union types in `Models/`, `net11.0` only.
+- Case types, `net11.0` only: `Committed` (the new commit), `Staged` (`commitOnSuccess` was false; the change is in the index and `Head` is the unchanged HEAD), `Conflicted` (conflicted paths relative to the working tree), `NothingToRevert`.
+- `IRewriteService.RevertWithOutcomeAsync` and `IRewriteService.CherryPickWithOutcomeAsync`, `net11.0` only: same parameters as `RevertAsync` / `CherryPickAsync`, but conflicts and "nothing to revert" are returned as cases instead of thrown, and a run without a commit is told apart from a created commit. Bad arguments still throw `ArgumentException`.
+- `OutcomeMessages` in the app: the status-bar text for each case, one exhaustive switch per union with no discard arm.
+- Tests: 11 in `RewriteServiceTests` for the new methods and their agreement with the old ones, 7 in the new `OutcomeMessagesTests`. Full suite: **138 passing, 1 skipped**.
+
+### Changed
+- The app's cherry-pick and revert handlers call the union-returning methods and format through `OutcomeMessages`. What the app shows is unchanged: the same texts, and conflicts or "nothing to revert" still skip the refresh.
+- `LibGit2RewriteService` runs cherry-pick and revert through one shared core per operation; `RevertAsync` and `CherryPickAsync` keep their signatures, exceptions and messages on every target.
+
+Note: the Core targets `net8.0`, `net9.0` and `net10.0` are kept. They expose the old methods only (`RevertAsync`, `CherryPickAsync`); the unions and the `...WithOutcomeAsync` methods exist on `net11.0`.
+
 ## [0.4.1] — 2026-11-11
 
 Platform move to .NET 11. No feature or behaviour change.

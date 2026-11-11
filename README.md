@@ -14,7 +14,7 @@
   <img alt="Platform" src="https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue" />
   <a href="https://github.com/TechTeaStudio/GitUIClient/actions/workflows/dotnet.yml"><img alt="Build" src="https://img.shields.io/github/actions/workflow/status/TechTeaStudio/GitUIClient/dotnet.yml?branch=product&amp;logo=github&amp;label=build" /></a>
   <a href="LICENSE.txt"><img alt="License" src="https://img.shields.io/badge/license-MIT-blue.svg" /></a>
-  <img alt="Tests" src="https://img.shields.io/badge/tests-120%20passing-brightgreen" />
+  <img alt="Tests" src="https://img.shields.io/badge/tests-138%20passing-brightgreen" />
   <img alt="Version" src="https://img.shields.io/badge/version-0.4.0-9D2499" />
 </p>
 
@@ -57,7 +57,7 @@ src/TechTeaStudio.GitClient.App/
 ├── Controls/, Graph/, Services/  commit-graph control, lane builder, IGravatarService
 └── Assets/                       app.ico + Icons/*.png
 
-tests/TechTeaStudio.GitClient.Core.Tests/    xUnit, 120 passing, 1 skipped
+tests/TechTeaStudio.GitClient.Core.Tests/    xUnit, 138 passing, 1 skipped
 .github/workflows/dotnet.yml                  CI: restore + build + test on product
 ```
 

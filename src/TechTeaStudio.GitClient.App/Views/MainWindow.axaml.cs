@@ -508,8 +508,12 @@ public sealed partial class MainWindow : Window
         if (req is null) return;
         await RunAndReportAsync(async () =>
         {
-            var rc = await Vm.Services.Rewrites.RevertAsync(Vm.Handle!, req.Sha, Vm.DefaultAuthor, req.CommitOnSuccess);
-            return $"Reverted: {rc.Sha[..7]}";
+            var outcome = await Vm.Services.Rewrites.RevertWithOutcomeAsync(Vm.Handle!, req.Sha, Vm.DefaultAuthor, req.CommitOnSuccess);
+            var msg = OutcomeMessages.Revert(outcome, req.Sha);
+            // Conflicts and "nothing to revert" are reported without the post-mutation refresh.
+            if (outcome.Value is Conflicted or NothingToRevert)
+                throw new InvalidOperationException(msg);
+            return msg;
         });
     }
 
@@ -523,8 +527,12 @@ public sealed partial class MainWindow : Window
         if (req is null) return;
         await RunAndReportAsync(async () =>
         {
-            var cc = await Vm.Services.Rewrites.CherryPickAsync(Vm.Handle!, req.Sha, Vm.DefaultAuthor, req.CommitOnSuccess);
-            return $"Cherry-picked: {cc.Sha[..7]}";
+            var outcome = await Vm.Services.Rewrites.CherryPickWithOutcomeAsync(Vm.Handle!, req.Sha, Vm.DefaultAuthor, req.CommitOnSuccess);
+            var msg = OutcomeMessages.CherryPick(outcome, req.Sha);
+            // Conflicts are reported without the post-mutation refresh.
+            if (outcome.Value is Conflicted)
+                throw new InvalidOperationException(msg);
+            return msg;
         });
     }
 

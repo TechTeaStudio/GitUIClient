@@ -71,6 +71,36 @@ public interface IRewriteService
         bool commitOnSuccess,
         CancellationToken ct = default);
 
+#if NET11_0_OR_GREATER
+    /// <summary>
+    /// Revert <paramref name="commitSha"/> like <see cref="RevertAsync"/>, but
+    /// report what happened as a <see cref="RevertOutcome"/> instead of throwing:
+    /// conflicts and "nothing to revert" are cases, and a run with
+    /// <paramref name="commitOnSuccess"/> <c>false</c> is told apart from a
+    /// created commit. Unresolvable or invalid arguments still throw
+    /// <see cref="ArgumentException"/>. Available on net11.0 only.
+    /// </summary>
+    Task<RevertOutcome> RevertWithOutcomeAsync(
+        IRepoHandle handle,
+        string commitSha,
+        AuthorInfo reverter,
+        bool commitOnSuccess,
+        CancellationToken ct = default);
+
+    /// <summary>
+    /// Cherry-pick <paramref name="commitSha"/> like <see cref="CherryPickAsync"/>,
+    /// but report what happened as a <see cref="CherryPickOutcome"/> instead of
+    /// throwing on conflicts. Unresolvable or invalid arguments still throw
+    /// <see cref="ArgumentException"/>. Available on net11.0 only.
+    /// </summary>
+    Task<CherryPickOutcome> CherryPickWithOutcomeAsync(
+        IRepoHandle handle,
+        string commitSha,
+        AuthorInfo committer,
+        bool commitOnSuccess,
+        CancellationToken ct = default);
+#endif
+
     /// <summary>
     /// Reset HEAD to <paramref name="targetSha"/> with the given <paramref name="mode"/>.
     /// <see cref="ResetKind.Hard"/> discards working-tree changes — destructive.

@@ -174,6 +174,85 @@ public sealed class LibGit2RewriteService : IRewriteService
         bool commitOnSuccess,
         CancellationToken ct = default)
     {
+        var step = await RevertCoreAsync(handle, commitSha, reverter, commitOnSuccess, ct).ConfigureAwait(false);
+
+        return step.Kind switch
+        {
+            RewriteStepKind.Conflicts => throw new InvalidOperationException(
+                $"Revert of '{commitSha}' produced conflicts; resolve them in the working tree before retrying."),
+            RewriteStepKind.NothingToRevert => throw new InvalidOperationException(
+                $"Nothing to revert for '{commitSha}'."),
+            // No commit was made when commitOnSuccess is false: HEAD is returned as it stands.
+            _ => step.Head!,
+        };
+    }
+
+    public async Task<CommitInfo> CherryPickAsync(
+        IRepoHandle handle,
+        string commitSha,
+        AuthorInfo committer,
+        bool commitOnSuccess,
+        CancellationToken ct = default)
+    {
+        var step = await CherryPickCoreAsync(handle, commitSha, committer, commitOnSuccess, ct).ConfigureAwait(false);
+
+        return step.Kind switch
+        {
+            RewriteStepKind.Conflicts => throw new InvalidOperationException(
+                $"Cherry-pick of '{commitSha}' produced conflicts; resolve them in the working tree before retrying."),
+            // No commit was made when commitOnSuccess is false: HEAD is returned as it stands.
+            _ => step.Head!,
+        };
+    }
+
+#if NET11_0_OR_GREATER
+    public async Task<RevertOutcome> RevertWithOutcomeAsync(
+        IRepoHandle handle,
+        string commitSha,
+        AuthorInfo reverter,
+        bool commitOnSuccess,
+        CancellationToken ct = default)
+    {
+        var step = await RevertCoreAsync(handle, commitSha, reverter, commitOnSuccess, ct).ConfigureAwait(false);
+
+        return step.Kind switch
+        {
+            RewriteStepKind.Conflicts => new Conflicted { Paths = step.ConflictedPaths },
+            RewriteStepKind.NothingToRevert => new NothingToRevert(),
+            RewriteStepKind.CommitCreated => new Committed { Commit = step.Commit! },
+            _ => new Staged { Head = step.Head! },
+        };
+    }
+
+    public async Task<CherryPickOutcome> CherryPickWithOutcomeAsync(
+        IRepoHandle handle,
+        string commitSha,
+        AuthorInfo committer,
+        bool commitOnSuccess,
+        CancellationToken ct = default)
+    {
+        var step = await CherryPickCoreAsync(handle, commitSha, committer, commitOnSuccess, ct).ConfigureAwait(false);
+
+        return step.Kind switch
+        {
+            RewriteStepKind.Conflicts => new Conflicted { Paths = step.ConflictedPaths },
+            RewriteStepKind.CommitCreated => new Committed { Commit = step.Commit! },
+            _ => new Staged { Head = step.Head! },
+        };
+    }
+#endif
+
+    /// <summary>
+    /// Shared revert: validates, resolves, runs the revert under the handle's
+    /// lock and reports what happened. Throws only for bad arguments.
+    /// </summary>
+    private static async Task<RewriteStepResult> RevertCoreAsync(
+        IRepoHandle handle,
+        string commitSha,
+        AuthorInfo reverter,
+        bool commitOnSuccess,
+        CancellationToken ct)
+    {
         ArgumentException.ThrowIfNullOrWhiteSpace(commitSha);
         ArgumentNullException.ThrowIfNull(reverter);
         ArgumentException.ThrowIfNullOrWhiteSpace(reverter.Name);
@@ -194,15 +273,11 @@ public sealed class LibGit2RewriteService : IRewriteService
             });
 
             if (result.Status == RevertStatus.Conflicts)
-                throw new InvalidOperationException(
-                    $"Revert of '{commitSha}' produced conflicts; resolve them in the working tree before retrying.");
+                return ConflictsStep(repo);
             if (result.Status == RevertStatus.NothingToRevert)
-                throw new InvalidOperationException(
-                    $"Nothing to revert for '{commitSha}'.");
+                return new RewriteStepResult { Kind = RewriteStepKind.NothingToRevert };
 
-            var newHead = result.Commit ?? repo.Head.Tip
-                ?? throw new InvalidOperationException("Revert succeeded but HEAD has no tip commit.");
-            return MapCommit(newHead);
+            return CleanStep(result.Commit, repo, "Revert succeeded but HEAD has no tip commit.");
         }
         finally
         {
@@ -210,12 +285,16 @@ public sealed class LibGit2RewriteService : IRewriteService
         }
     }
 
-    public async Task<CommitInfo> CherryPickAsync(
+    /// <summary>
+    /// Shared cherry-pick: validates, resolves, runs the cherry-pick under the
+    /// handle's lock and reports what happened. Throws only for bad arguments.
+    /// </summary>
+    private static async Task<RewriteStepResult> CherryPickCoreAsync(
         IRepoHandle handle,
         string commitSha,
         AuthorInfo committer,
         bool commitOnSuccess,
-        CancellationToken ct = default)
+        CancellationToken ct)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(commitSha);
         ArgumentNullException.ThrowIfNull(committer);
@@ -237,12 +316,9 @@ public sealed class LibGit2RewriteService : IRewriteService
             });
 
             if (result.Status == CherryPickStatus.Conflicts)
-                throw new InvalidOperationException(
-                    $"Cherry-pick of '{commitSha}' produced conflicts; resolve them in the working tree before retrying.");
+                return ConflictsStep(repo);
 
-            var newHead = result.Commit ?? repo.Head.Tip
-                ?? throw new InvalidOperationException("Cherry-pick succeeded but HEAD has no tip commit.");
-            return MapCommit(newHead);
+            return CleanStep(result.Commit, repo, "Cherry-pick succeeded but HEAD has no tip commit.");
         }
         finally
         {
@@ -275,6 +351,34 @@ public sealed class LibGit2RewriteService : IRewriteService
     }
 
     // -- helpers -----------------------------------------------------------
+
+    /// <summary>
+    /// Conflicted paths from the index, by the same rule as
+    /// <c>LibGit2ConflictsService</c>: ours, else theirs, else ancestor.
+    /// </summary>
+    private static RewriteStepResult ConflictsStep(Repository repo) => new()
+    {
+        Kind = RewriteStepKind.Conflicts,
+        ConflictedPaths = repo.Index.Conflicts
+            .Select(c => c.Ours?.Path ?? c.Theirs?.Path ?? c.Ancestor?.Path ?? string.Empty)
+            .ToList(),
+    };
+
+    /// <summary>
+    /// Result of an operation that applied cleanly: the created commit when
+    /// there is one, otherwise HEAD as it stands with the change left in the index.
+    /// </summary>
+    private static RewriteStepResult CleanStep(Commit? created, Repository repo, string noHeadMessage)
+    {
+        if (created is not null)
+        {
+            var commit = MapCommit(created);
+            return new RewriteStepResult { Kind = RewriteStepKind.CommitCreated, Commit = commit, Head = commit };
+        }
+
+        var head = repo.Head.Tip ?? throw new InvalidOperationException(noHeadMessage);
+        return new RewriteStepResult { Kind = RewriteStepKind.LeftInIndex, Head = MapCommit(head) };
+    }
 
     private static Signature BuildSignature(AuthorInfo info) => new(
         info.Name,
